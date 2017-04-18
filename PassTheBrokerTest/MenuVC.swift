@@ -19,21 +19,8 @@ class MenuVC: UIViewController {
     
     override func viewDidLoad() {
         
-        lblVersion.text = "Version : \(UserDefaults.standard.value(forKey: "AppVersion") as! NSInteger)"
-    }
-    
-    override func didReceiveMemoryWarning() {
-        
-    }
-    
-    func showAlert(msg:String)  {
-        let alert = UIAlertController(title: "PassTheBrokerExam", message: msg, preferredStyle: .alert)
-        
-        let OkAction = UIAlertAction(title: "OK", style: .cancel) { (UIAlertAction) in
-            
-        }
-        alert.addAction(OkAction)
-        self.present(alert, animated: true, completion: nil)
+        // UNCOMMENT
+//        lblVersion.text = "Version : \(UserDefaults.standard.value(forKey: "AppVersion") as! NSInteger)"
     }
     
 //    MARK: - Action Methods
@@ -43,9 +30,8 @@ class MenuVC: UIViewController {
     }
     
     @IBAction func btnGoToTestMenu(_ sender: Any) {
-        let ctvc = storyboard?.instantiateViewController(withIdentifier: "ChoiceTestVC") as! ChoiceTestVC
-        navigationController?.pushViewController(ctvc, animated: false)
-        
+        let ctvc = storyboard?.instantiateViewController(withIdentifier: "ChoiceTestVC")
+        navigationController?.pushViewController(ctvc!, animated: false)
     }
     
     @IBAction func btnTestHistory(_ sender: Any) {
@@ -59,12 +45,7 @@ class MenuVC: UIViewController {
     }
     
     @IBAction func btnLogOut(_ sender: Any) {
-        
-        UserDefaults.standard.set("", forKey: "sessionKey")
-        UserDefaults.standard.set("", forKey: "userEmail")
-        
-        let vc = storyboard?.instantiateViewController(withIdentifier: "ViewController") as! ViewController
-        navigationController?.pushViewController(vc, animated: false)
+        Event.shared.logout()
     }
     
 }

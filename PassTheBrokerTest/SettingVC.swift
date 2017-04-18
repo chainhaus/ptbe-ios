@@ -22,28 +22,14 @@ class SettingVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
 //    MARK: - Methods
     
     override func viewDidLoad() {
-        
-    }
-    
-    override func didReceiveMemoryWarning() {
-        
-    }
-    
-    func showAlert(msg:String)  {
-        let alert = UIAlertController(title: "PassTheBrokerExam", message: msg, preferredStyle: .alert)
-        
-        let OkAction = UIAlertAction(title: "OK", style: .cancel) { (UIAlertAction) in
-            
-        }
-        alert.addAction(OkAction)
-        self.present(alert, animated: true, completion: nil)
+        super.viewDidLoad()
     }
     
     func resetPsw() {
         
-        let rechability = Reachability()
+//        let rechability = Reachability()
         
-        if rechability?.isReachable == true {
+//        if rechability?.isReachable == true {
             print("rechable")
             let strURL = "\((app?.strService)! as String)resetPassword"
             
@@ -67,15 +53,19 @@ class SettingVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
                     
                     print("Response : \(jsonDict)")
                     if jsonDict.isEqual(nil) {
-                        print("Error :\(error)")
+                        print("Error :\(error?.localizedDescription ?? "none")")
                     }
                     else {
                         DispatchQueue.main.async {
                             if  (jsonDict["errorCode"] as! NSInteger) < 0 {
-                                self.showAlert(msg: "Failed to sent email")
+                                UIAlertController.show(okAlertIn: self,
+                                                       withTitle: "Warning",
+                                                       message: "Failed to sent email")
                             }
                             else {
-                                self.showAlert(msg: "\(jsonDict["status"]!)")
+                                UIAlertController.show(okAlertIn: self,
+                                                       withTitle: "Warning",
+                                                       message: (jsonDict["status"] as? String?)!)
                             }
                             
                         }
@@ -87,11 +77,13 @@ class SettingVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
             })
             task.resume()
             
-        }
-        else {
-            print("not rechable")
-            showAlert(msg: "Make sure your device is connected to the internet.")
-        }
+//        }
+//        else {
+//            print("not rechable")
+//            UIAlertController.show(okAlertIn: self,
+//                                   withTitle: "Warning",
+//                                   message: "Make sure your device is connected to the internet.")
+//        }
     }
 
     
@@ -103,12 +95,7 @@ class SettingVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
     }
     
     @IBAction func btnLogOut(_ sender: Any) {
-        
-        UserDefaults.standard.set("", forKey: "sessionKey")
-        UserDefaults.standard.set("", forKey: "userEmail")
-        
-        let vc = storyboard?.instantiateViewController(withIdentifier: "ViewController") as! ViewController
-        navigationController?.pushViewController(vc, animated: false)
+        Event.shared.logout()
     }
     
 //    MARK: - Table View Delegate

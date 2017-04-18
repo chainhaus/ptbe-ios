@@ -74,11 +74,6 @@ class TestHistoryVC: UIViewController,UITableViewDelegate,UITableViewDataSource 
         
     }
     
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-    
     func bottomBorder(txtField:UILabel) {
         let border = CALayer()
         let width = CGFloat(2.0)
@@ -94,7 +89,7 @@ class TestHistoryVC: UIViewController,UITableViewDelegate,UITableViewDataSource 
     
     func showAdImag() {
         
-        print("AD : \((UserDefaults.standard.value(forKey: "adImage") as? String))")
+        print("AD : \((Settings.shared.adImageUrlString ?? ""))")
         if (UserDefaults.standard.value(forKey: "adImage") as? String) == nil {
             btnAD.isEnabled = false
         }
@@ -109,16 +104,6 @@ class TestHistoryVC: UIViewController,UITableViewDelegate,UITableViewDataSource 
 //        self.arrMainData = UserDefaults.standard.value(forKey: "oldData") as! NSMutableArray
         print("Response : \(self.arrMainData)")
         self.tblHistory.reloadData()
-    }
-    
-    func showAlert(msg:String)  {
-        let alert = UIAlertController(title: "PassTheBrokerExam", message: msg, preferredStyle: .alert)
-        
-        let OkAction = UIAlertAction(title: "OK", style: .cancel) { (UIAlertAction) in
-            
-        }
-        alert.addAction(OkAction)
-        self.present(alert, animated: true, completion: nil)
     }
 
     

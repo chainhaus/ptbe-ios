@@ -8,13 +8,13 @@
 
 import Foundation
 
-public struct IAPProducts {
-    
-    public static let premiumQuestions = "PTBE1NYSALES"
-    
-    private static let productIdentifiers: Set<OverrideProductIdentifier> = [
-        IAPProducts.premiumQuestions
-    ]
-    
-    public static let store = IAPHelper(productIDs: IAPProducts.productIdentifiers)
-}
+//public struct IAPProducts {
+//    
+//    public static let premiumQuestions = "PTBE1NYSALES"
+//    
+//    private static let productIdentifiers: Set<OverrideProductIdentifier> = [
+//        IAPProducts.premiumQuestions
+//    ]
+//    
+//    public static let store = IAPHelper(productIDs: IAPProducts.productIdentifiers)
+//}

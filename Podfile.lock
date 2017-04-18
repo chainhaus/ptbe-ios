@@ -1,0 +1,29 @@
+PODS:
+  - Alamofire (4.3.0)
+  - ImageLoader (0.12.2)
+  - IQKeyboardManager (4.0.8)
+  - MBProgressHUD (1.0.0)
+  - Realm (2.4.2):
+    - Realm/Headers (= 2.4.2)
+  - Realm/Headers (2.4.2)
+  - RealmSwift (2.4.2):
+    - Realm (= 2.4.2)
+
+DEPENDENCIES:
+  - Alamofire
+  - ImageLoader
+  - IQKeyboardManager
+  - MBProgressHUD
+  - RealmSwift
+
+SPEC CHECKSUMS:
+  Alamofire: 856a113053a7bc9cbe5d6367a555d773fc5cfef7
+  ImageLoader: f461c9641350d0b8df39c2d3785b263f15cd63c2
+  IQKeyboardManager: 1a8189fa153bf09044355ee0ad36826f6767e7f7
+  MBProgressHUD: 4890f671c94e8a0f3cf959aa731e9de2f036d71a
+  Realm: d27b758e12d62a3371879a065d4c40aa212c5a54
+  RealmSwift: 9556c0fe0f0cfecacfb755ae9e68ff379fc6bead
+
+PODFILE CHECKSUM: 7e16a1d81a9bf55b1b5f137fa7517dfcb57c8538
+
+COCOAPODS: 1.2.0

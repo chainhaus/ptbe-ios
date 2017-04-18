@@ -29,7 +29,7 @@
         <!--ViewController-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController storyboardIdentifier="ViewController" title="ViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="BYZ-38-t0r" customClass="ViewController" customModule="PassTheBrokerTest" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="LoginVC" title="ViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="BYZ-38-t0r" customClass="LoginVC" customModule="PassTheBrokerTest" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -205,7 +205,7 @@
         <!--ChoiceTestVC-->
         <scene sceneID="odD-Jl-zaY">
             <objects>
-                <viewController storyboardIdentifier="ChoiceTestVC" title="ChoiceTestVC" useStoryboardIdentifierAsRestorationIdentifier="YES" id="lLs-Te-Rbi" customClass="ChoiceTestVC" customModule="PassTheBrokerTest" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ChoiceTestVC" title="ChoiceTestVC" useStoryboardIdentifierAsRestorationIdentifier="YES" id="lLs-Te-Rbi" customClass="MainVC" customModule="PassTheBrokerTest" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="FUg-mH-Fw0">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

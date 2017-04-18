@@ -5,6 +5,8 @@
  */
 
 import UIKit
+import IQKeyboardManager
+import RealmSwift
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -13,49 +15,60 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     let strService = "http://52.206.94.249:5000/api/1/" // This should be moved out of here
     
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         
-        IQKeyboardManager.sharedManager().enable = true
-        
-        let navigationController: UINavigationController? = (window?.rootViewController as? UINavigationController)
-        let mainStoryboard = UIStoryboard(name: "Main", bundle: nil)
-        
-        print("\(UserDefaults.standard.value(forKey: "sessionKey"))")
-        
-        if (UserDefaults.standard.value(forKey: "sessionKey") == nil) || (UserDefaults.standard.value(forKey: "sessionKey") as! String).isEmpty == true {
-            let sqvc = mainStoryboard.instantiateViewController(withIdentifier: "ViewController") as! ViewController
-            navigationController?.pushViewController(sqvc, animated: false)
+        IQKeyboardManager.shared().isEnabled = true
+      
+        // Make Realm encrypt all data
+        autoreleasepool {
+            let configuration = Realm.Configuration(encryptionKey: getKey() as Data)
+            do {
+                _ = try Realm(configuration: configuration)
+                Realm.Configuration.defaultConfiguration = configuration
+            } catch {
+                abort()
+            }
         }
-        else {
-            let sqvc = mainStoryboard.instantiateViewController(withIdentifier: "ChoiceTestVC") as! ChoiceTestVC
-            navigationController?.pushViewController(sqvc, animated: false)
-        }
+        
         return true
     }
-
-    func applicationWillResignActive(_ application: UIApplication) {
-        // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
-        // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
+    
+    private func getKey() -> NSData {
+        let keychainIdentifier      = "com.overridelabs.ptbe.ny.sales.Realm"
+        let keychainIdentifierData  = keychainIdentifier.data(using: String.Encoding.utf8, allowLossyConversion: false)!
+        
+        var query: [NSString: AnyObject] = [
+            kSecClass:              kSecClassKey,
+            kSecAttrApplicationTag: keychainIdentifierData as AnyObject,
+            kSecAttrKeySizeInBits:  512 as AnyObject,
+            kSecReturnData:         true as AnyObject
+        ]
+        
+        var dataTypeRef: AnyObject?
+        var status = withUnsafeMutablePointer(to: &dataTypeRef) {
+            SecItemCopyMatching(query as CFDictionary, UnsafeMutablePointer($0))
+        }
+        
+        if status == errSecSuccess {
+            return dataTypeRef as! NSData
+        }
+        
+        let keyData = NSMutableData(length: 64)!
+        let result = SecRandomCopyBytes(kSecRandomDefault, 64,
+                                        keyData.mutableBytes.bindMemory(to: UInt8.self, capacity: 64))
+        assert(result == 0, "Failed to get random bytes")
+        
+        query = [
+            kSecClass:              kSecClassKey,
+            kSecAttrApplicationTag: keychainIdentifierData as AnyObject,
+            kSecAttrKeySizeInBits:  512 as AnyObject,
+            kSecValueData:          keyData
+        ]
+        
+        status = SecItemAdd(query as CFDictionary, nil)
+        assert(status == errSecSuccess, "Failed to insert the new key in the keychain with status \(status)")
+        
+        return keyData
     }
-
-    func applicationDidEnterBackground(_ application: UIApplication) {
-        // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
-        // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-    }
-
-    func applicationWillEnterForeground(_ application: UIApplication) {
-        // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
-    }
-
-    func applicationDidBecomeActive(_ application: UIApplication) {
-        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-    }
-
-    func applicationWillTerminate(_ application: UIApplication) {
-        // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
-    }
-
-
 }
 

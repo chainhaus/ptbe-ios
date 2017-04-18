@@ -36,14 +36,9 @@ class TestResultVC: UIViewController {
         
     }
     
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-    
     func showAdImag() {
         
-        print("AD : \((UserDefaults.standard.value(forKey: "adImage") as? String))")
+        print("AD : \(Settings.shared.adImageUrlString ?? "none")")
         if (UserDefaults.standard.value(forKey: "adImage") as? String) == nil {
             btnAD.isEnabled = false
         }
@@ -64,23 +59,12 @@ class TestResultVC: UIViewController {
     }
     
     @IBAction func btnNewTest(_ sender: Any) {
-        let ctvc = storyboard?.instantiateViewController(withIdentifier: "ChoiceTestVC") as! ChoiceTestVC
-        navigationController?.pushViewController(ctvc, animated: true)
+        let ctvc = storyboard?.instantiateViewController(withIdentifier: "ChoiceTestVC")
+        navigationController?.pushViewController(ctvc!, animated: true)
     }
     
     @IBAction func btnShowAd(_ sender: Any) {
         let strUrl = (UserDefaults.standard.value(forKey: "adURL") as! String)
         UIApplication.shared.openURL(URL(string: strUrl)!)
     }
-    
-//    func showAlert(msg:String)  {
-//        let alert = UIAlertController(title: "PassTheBrokerExam", message: msg, preferredStyle: .alert)
-//        
-//        let OkAction = UIAlertAction(title: "OK", style: .cancel) { (UIAlertAction) in
-//            
-//        }
-//        alert.addAction(OkAction)
-//        self.present(alert, animated: true, completion: nil)
-//    }
-
 }

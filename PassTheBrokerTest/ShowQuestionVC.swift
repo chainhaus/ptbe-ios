@@ -76,11 +76,6 @@ class ShowQuestionVC: UIViewController {
         
     }
     
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-    
     override func viewWillAppear(_ animated: Bool) {
 //        if (UserDefaults.standard.value(forKey: "oldData") == nil) {
 //            Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(getQuestion), userInfo: nil, repeats: false)
@@ -97,7 +92,7 @@ class ShowQuestionVC: UIViewController {
     
     func showAdImag() {
         
-        print("AD : \((UserDefaults.standard.value(forKey: "adImage") as? String))")
+        print("AD : \((Settings.shared.adImageUrlString ?? "none"))")
         if (UserDefaults.standard.value(forKey: "adImage") as? String) == nil {
             btnAD.isEnabled = false
         }
@@ -171,7 +166,7 @@ class ShowQuestionVC: UIViewController {
         var randomIndex = 0
         
         if repeatQue != 0 {
-            for var i in 0 ..< repeatQue {
+            for _ in 0 ..< repeatQue {
                 randomIndex = Int(arc4random_uniform(UInt32(arrMainData.count)))
 //                print(arrTest[randomIndex])
                 
@@ -235,10 +230,6 @@ class ShowQuestionVC: UIViewController {
     }
     
     func getQuestion() {
-        
-        let rechability = Reachability()
-        
-        if rechability?.isReachable == true {
             print("rechable")
             let strURL = "\((app?.strService)! as String)getQuestionBank"
             
@@ -262,7 +253,7 @@ class ShowQuestionVC: UIViewController {
                     
                     print("Response : \(self.jsonDict)")
                     if self.jsonDict.isEqual(nil) {
-                        print("Error :\(error)")
+                        print("Error :\(error?.localizedDescription ?? "unknown")")
                     }
                     else {
                         DispatchQueue.main.async {
@@ -281,13 +272,6 @@ class ShowQuestionVC: UIViewController {
                 }
             })
             task.resume()
-
-        }
-        else {
-            print("not rechable")
-            self.actInd_showQst.stopAnimating()
-            showAlert(msg: "Make sure your device is connected to the internet.")
-        }
     }
     
     func clearcolor()  {
@@ -311,16 +295,6 @@ class ShowQuestionVC: UIViewController {
         btn.isSelected = true
         btn.layer.borderColor = UIColor(red:0.04, green:0.82, blue:0.95, alpha:1.0).cgColor
         btn.layer.borderWidth = 2
-    }
-    
-    func showAlert(msg:String)  {
-        let alert = UIAlertController(title: "PassTheBrokerExam", message: msg, preferredStyle: .alert)
-        
-        let OkAction = UIAlertAction(title: "OK", style: .cancel) { (UIAlertAction) in
-            
-        }
-        alert.addAction(OkAction)
-        self.present(alert, animated: true, completion: nil)
     }
 
     // MARK: - Action Methods
@@ -376,7 +350,9 @@ class ShowQuestionVC: UIViewController {
         
         if crtQuestion < 1  {
             previousBtn.isEnabled = false
-            showAlert(msg: "You reach at first question")
+            UIAlertController.show(okAlertIn: self,
+                                   withTitle: "Warning",
+                                   message: "You reach at first questions")
         }
             
         else {
@@ -393,7 +369,7 @@ class ShowQuestionVC: UIViewController {
     
     func checkResult() {
         
-        for var i in (0..<arrUserAns.count).reversed()
+        for i in (0..<arrUserAns.count).reversed()
         {
             if (self.arrRandomQuestion[i] as! NSDictionary)["answer"] as! NSInteger == arrUserAns[i] as! NSInteger  {
                 rightAns = rightAns + 1
@@ -414,7 +390,9 @@ class ShowQuestionVC: UIViewController {
         
 
         if choice == 0 {
-            showAlert(msg: "You must be choice any one from Options.")
+            UIAlertController.show(okAlertIn: self,
+                                   withTitle: "Warning",
+                                   message: "You must be choice any one from Options.")
         }
             
         else {

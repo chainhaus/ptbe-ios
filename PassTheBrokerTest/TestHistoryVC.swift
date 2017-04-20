@@ -26,14 +26,14 @@ class TestHistoryVC: UIViewController,UITableViewDelegate,UITableViewDataSource 
     var showReview:NSInteger = 0
     
     
-//    MARK: - IBOutlet
+    // MARK: - IBOutlet
     
     @IBOutlet weak var tblHistory: UITableView!
     @IBOutlet weak var lblTitle: UILabel!
     @IBOutlet weak var actInd_THistory: UIActivityIndicatorView!
     
     
-//    MARK: - Methods
+    // MARK: - Methods
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -107,7 +107,7 @@ class TestHistoryVC: UIViewController,UITableViewDelegate,UITableViewDataSource 
     }
 
     
-//    MARK: - Action Methods
+    // MARK: - Action Methods
     
     @IBAction func btnMenu(_ sender: Any) {
         let mvc = storyboard?.instantiateViewController(withIdentifier: "MenuVC") as! MenuVC
@@ -118,7 +118,7 @@ class TestHistoryVC: UIViewController,UITableViewDelegate,UITableViewDataSource 
         let strUrl = (UserDefaults.standard.value(forKey: "adURL") as! String)
         UIApplication.shared.openURL(URL(string: strUrl)!)
     }
-//    MARK: - Table View Delegate
+    // MARK: - Table View Delegate
     
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if showReview == 1 {

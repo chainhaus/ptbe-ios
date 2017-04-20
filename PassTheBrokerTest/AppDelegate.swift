@@ -30,6 +30,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
         
+        Test.make()
+        
         return true
     }
     

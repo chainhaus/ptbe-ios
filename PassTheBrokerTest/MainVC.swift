@@ -14,25 +14,16 @@ class MainVC: UIViewController {
     
     // MARK: - IBOutlet
     
-    @IBOutlet weak var DashBtn: UIButton!
-    @IBOutlet weak var MarathonBtn: UIButton!
-    @IBOutlet weak var sprintBtn: UIButton!
-    @IBOutlet weak var imgsprint: UIImageView!
-    @IBOutlet weak var lblSprint: UILabel!
-    @IBOutlet weak var imgDash: UIImageView!
-    @IBOutlet weak var lblDash: UILabel!
-    @IBOutlet weak var lblMarathon: UILabel!
-    @IBOutlet weak var imageMarathon: UIImageView!
-    @IBOutlet weak var imgAD: UIImageView!
-    @IBOutlet weak var btnAD: UIButton!
+    @IBOutlet weak var dabbleButton: TestButton!
+    @IBOutlet weak var playButton: TestButton!
+    @IBOutlet weak var grindButton: TestButton!
+    @IBOutlet weak var adView: AdView!
     
     // MARK: - Methods
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        clearData()
-        
+                
         // Check whether we need to update local database
         if Settings.shared.versionShouldUpdate || Question.cachedList().count == 0 {
             Api.shared.receiveVersion(callback: { versionChanged in
@@ -43,16 +34,23 @@ class MainVC: UIViewController {
         }
         
         // Sign for log out action
-        Event.shared.onLogout {
-            self.navigationController?.popToRootViewController(animated: true)
+        Event.shared.onLogout { [weak self] in // cast weak to avoid memory leak
+            if let `self` = self {
+                self.navigationController?.popToRootViewController(animated: true)
+            }
+        }
+        
+        // Sign for open mainVC
+        Event.shared.onOpenMain { [weak self] in // cast weak to avoid memory leak
+            if let `self` = self {
+                self.navigationController?.popToViewController(self, animated: true)
+            }
         }
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        Api.shared.receiveAd {
-            self.showAdImage()
-        }
+        adView.load()
     }
     
     private func loadQuestions(callback: (() -> Void)?) {
@@ -78,114 +76,59 @@ class MainVC: UIViewController {
         }
     }
     
-    func showAdImage() {
-        if let adImageUrlString = Settings.shared.adImageUrlString {
-            btnAD.isEnabled = true
-            imgAD.load.request(with: URL(string: adImageUrlString)!)
-        } else {
-            btnAD.isEnabled = false
-        }
+    // MARK: - Action Methods
+    
+    func purchase() {
+        
     }
     
-    func clearData()  {
-        sprintBtn.isSelected = false
-        lblSprint.textColor = UIColor.black
-        imgsprint.isHidden = true
-        
-        DashBtn.isSelected = false
-        lblDash.textColor = UIColor.black
-        imgDash.isHidden = true
-        
-        MarathonBtn.isSelected = false
-        lblMarathon.textColor = UIColor.black
-        imageMarathon.isHidden = true
-    }
-    
-    func GoToTest(testType: NSInteger)  {
+    func openTest(testButton: TestButton, kind: Test.Kind) {
         if Question.cachedList().count == 0 {
             loadQuestions {
-                self.GoToTest(testType: testType)
+                self.openTest(testButton: testButton, kind: kind)
             }
             return
         }
         
-        let ctvc = storyboard?.instantiateViewController(withIdentifier: "ShowQuestionVC") as! ShowQuestionVC
-        if testType==1 {
-            ctvc.typeTest = 1
-        }
-        else if testType == 2 {
-            ctvc.typeTest = 2
-        }
-        else if testType == 3 {
-            ctvc.typeTest = 3
-        }
-        navigationController?.pushViewController(ctvc, animated: true)
-    }
-    
-    //MARK: -Action Method
-    
-    @IBAction func btnShowAd(_ sender: Any) {
-        
-        let strUrl = (UserDefaults.standard.value(forKey: "adURL") as! String)
-        UIApplication.shared.openURL(URL(string: strUrl)!)
-    }
-    
-    @IBAction func btnMarathonTest(_ sender: UIButton) {
-        
-        if sender.isSelected==true {
-            sender.isSelected = false
-            lblMarathon.textColor = UIColor.black
-            imageMarathon.isHidden = true
-        }
-        else {
-            clearData()
-            sender.isSelected = true
-            lblMarathon.textColor = UIColor.white
-            imageMarathon.isHidden = false
-            //            GoToTest(testType: 3)
-            //            showAlertPurchase()
-            UIApplication.shared.isNetworkActivityIndicatorVisible = true
-            //            appPurchase()
+        let test = Test.of(kind: kind)
+        print("Test of kind \(kind) is purchased = \(test.purchased)")
+        if !test.purchased {
+            testButton.highlighted = true
             
+            UIAlertController.show(in: self,
+                                   withTitle: "Premium access",
+                                   message: "Get over 1,000+ test questions and the Dabble and Grind tests for $19.99",
+                                   actions: [
+                                    UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
+                                        testButton.highlighted = false
+                                    }),
+                                    UIAlertAction(title: "Buy", style: .default, handler: { _ in
+                                        self.purchase()
+                                    })])
+            
+            return
         }
-    }
-    
-    @IBAction func btnDashTest(_ sender: UIButton) {
         
-        if sender.isSelected==true {
-            sender.isSelected = false
-            lblDash.textColor = UIColor.black
-            imgDash.isHidden = true
-        }
-        else {
-            clearData()
-            sender.isSelected = true
-            lblDash.textColor = UIColor.white
-            imgDash.isHidden = false
-            //            GoToTest(testType: 2)
-            //            showAlertPurchase()
-            UIApplication.shared.isNetworkActivityIndicatorVisible = true
-            //            appPurchase()
-        }
+        let vc = storyboard?.instantiateViewController(withIdentifier: "TestVC") as! TestVC
+        vc.test = test
+        
+        navigationController?.pushViewController(vc, animated: true)
     }
     
-    @IBAction func btnSprintTest(_ sender: UIButton) {
-        return
-        if sender.isSelected==true {
-            sender.isSelected = false
-            lblSprint.textColor = UIColor.black
-            imgsprint.isHidden = true
-        }
-        else {
-            clearData()
-            sender.isSelected = true
-            lblSprint.textColor = UIColor.white
-            imgsprint.isHidden = false
-            GoToTest(testType: 1)
-        }
+    @IBAction func openDabble() {
+        openTest(testButton: dabbleButton, kind: .dabble)
     }
-    @IBAction func btnMenu(_ sender: Any) {
-        let mvc = storyboard?.instantiateViewController(withIdentifier: "MenuVC") as! MenuVC
-        navigationController?.pushViewController(mvc, animated: false)
+    
+    @IBAction func openPlay() {
+        openTest(testButton: playButton, kind: .play)
+    }
+    
+    @IBAction func openGrind() {
+        openTest(testButton: grindButton, kind: .grind)
+    }
+    
+    @IBAction func openMenu() {
+        let vc = storyboard?.instantiateViewController(withIdentifier: "MenuVC")
+        present(vc!, animated: true, completion: nil)
     }
 }

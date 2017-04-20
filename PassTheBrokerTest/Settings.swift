@@ -1,10 +1,8 @@
-//
-//  Settings.swift
-//  PassTheBrokerTest
-//
-//  Created by Aleksandr Poddubny on 18/04/2017.
-//  Copyright © 2017 MitsSoft. All rights reserved.
-//
+/*
+ 
+ Copyright © 2017 Override Labs. All Rights Reserved.
+ 
+ */
 
 import UIKit
 

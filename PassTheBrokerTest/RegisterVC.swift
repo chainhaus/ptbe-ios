@@ -12,11 +12,11 @@ class RegisterVC: UIViewController {
     
     // MARK: - IBOutlet
     
-    @IBOutlet weak var txtFieldFirstName: VMFloatLabelTextField!
-    @IBOutlet weak var txtFieldConfPsw: VMFloatLabelTextField!
-    @IBOutlet weak var txtFieldPsw: VMFloatLabelTextField!
-    @IBOutlet weak var txtFieldEmail: VMFloatLabelTextField!
-    @IBOutlet weak var txtFieldLastName: VMFloatLabelTextField!
+    @IBOutlet weak var firstNameTextField: VMFloatLabelTextField!
+    @IBOutlet weak var lastNameTextField: VMFloatLabelTextField!
+    @IBOutlet weak var emailTextField: VMFloatLabelTextField!
+    @IBOutlet weak var passwordTextField: VMFloatLabelTextField!
+    @IBOutlet weak var confirmPasswordTextField: VMFloatLabelTextField!
     
     @IBOutlet weak var btnSignUp: UIButton!
     
@@ -25,11 +25,11 @@ class RegisterVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        for tf: UITextField in [txtFieldEmail,
-                                txtFieldPsw,
-                                txtFieldConfPsw,
-                                txtFieldFirstName,
-                                txtFieldLastName] {
+        for tf: UITextField in [emailTextField,
+                                passwordTextField,
+                                confirmPasswordTextField,
+                                firstNameTextField,
+                                lastNameTextField] {
             tf.showBottomBorder()
         }
     }
@@ -37,27 +37,44 @@ class RegisterVC: UIViewController {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         view.endEditing(true)
     }
-    
-//    func keyboardWillShow(notification: NSNotification) {
-//        if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
-//            if self.view.frame.origin.y == 0{
-//                self.view.frame.origin.y -= keyboardSize.height
-//            }
-//        }
-//    }
-//    
-//    func keyboardWillHide(notification: NSNotification) {
-//        if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
-//            if self.view.frame.origin.y != 0{
-//                self.view.frame.origin.y += keyboardSize.height
-//            }
-//        }
-//    }
-    
-    
-    func register() {
+
+    // MARK: - Action Methods
+
+    @IBAction func register() {
+        let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
+        let emailTest = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
+        let match = emailTest.evaluate(with: emailTextField.text)
+        
+        var errorString: String?
+        
+        if emailTextField.text == "" {
+            errorString = "Please enter your e-mail"
+        } else if !match {
+            errorString = "Please enter valid e-mail"
+        } else if (emailTextField.text?.characters.count)! > 254 {
+            errorString = "Too long e-mail address"
+        } else if passwordTextField.text == "" {
+            errorString = "Please enter your password"
+        } else if (passwordTextField.text?.characters.count)! > 15 {
+            errorString = "Password shouldn't be longer than 15 digits"
+        } else if passwordTextField.text != confirmPasswordTextField.text {
+            errorString = "Passwords do not match"
+        } else if firstNameTextField.text == "" {
+            errorString = "Please enter your first name"
+        } else if lastNameTextField.text == "" {
+            errorString = "Please enter your last name"
+        }
+        
+        if let errorString = errorString {
+            UIAlertController.show(okAlertIn: self,
+                                   withTitle: "Warning",
+                                   message: errorString)
+            return
+        }
+        
         MBProgressHUD.showAdded(to: view, animated: true)
-        Api.shared.register(email: txtFieldEmail.text!, password: txtFieldConfPsw.text!, firstName: txtFieldFirstName.text!, lastName: txtFieldLastName.text!) {
+        
+        Api.shared.register(email: emailTextField.text!, password: confirmPasswordTextField.text!, firstName: firstNameTextField.text!, lastName: lastNameTextField.text!) {
             MBProgressHUD.hide(for: self.view, animated: true)
             
             if let errorString = $1 {
@@ -74,39 +91,8 @@ class RegisterVC: UIViewController {
             }
         }
     }
-
-    // MARK: - Action Methods
-
-    @IBAction func btnSignUpPress(_ sender: Any) {
-        let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
-        let emailTest = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
-        let match = emailTest.evaluate(with: txtFieldEmail.text)
-        
-        var errorString: String?
-        
-        if txtFieldPsw.text == "" ||
-            txtFieldEmail.text == "" ||
-            txtFieldConfPsw.text == "" ||
-            txtFieldLastName.text == "" ||
-            txtFieldFirstName.text == "" {
-            
-            errorString = "Please enter all fields"
-        } else if !match {
-            errorString = "Please enter valid email"
-        } else if txtFieldPsw.text != txtFieldConfPsw.text {
-            errorString = "Please enter Currect Password"
-        }
-        
-        if let errorString = errorString {
-            UIAlertController.show(okAlertIn: self,
-                                   withTitle: "Warning",
-                                   message: errorString)
-        } else {
-            register()
-        }
-    }
     
-    @IBAction func btnGoToLogIn(_ sender: Any) {
+    @IBAction func back() {
         navigationController?.popViewController(animated: true)
     }
 }

@@ -9,43 +9,56 @@ import UIKit
 
 class MenuVC: UIViewController {
     
-    let app = (UIApplication.shared.delegate as? AppDelegate)
+    // MARK: - IBOutlet
     
-//    MARK: - IBOutlet
+    @IBOutlet weak var versionLabel: UILabel!
     
-    @IBOutlet weak var lblVersion: UILabel!
-    
-//    MARK: - Methods
+    // MARK: - Methods
     
     override func viewDidLoad() {
-        
-        // UNCOMMENT
-//        lblVersion.text = "Version : \(UserDefaults.standard.value(forKey: "AppVersion") as! NSInteger)"
+        super.viewDidLoad()
+        versionLabel.text = "Version: \(Settings.shared.appVersion)"
     }
     
-//    MARK: - Action Methods
+    // MARK: - Action Methods
     
-    @IBAction func btnClose(_ sender: Any) {
-        _ = navigationController?.popViewController(animated: false)
+    @IBAction func close() {
+        dismiss(animated: true, completion: nil)
     }
     
-    @IBAction func btnGoToTestMenu(_ sender: Any) {
-        let ctvc = storyboard?.instantiateViewController(withIdentifier: "ChoiceTestVC")
-        navigationController?.pushViewController(ctvc!, animated: false)
+    @IBAction func takeATest() {
+        close()
+        Event.shared.openMain()
     }
     
-    @IBAction func btnTestHistory(_ sender: Any) {
-        let thvc = storyboard?.instantiateViewController(withIdentifier: "TestHistoryVC") as! TestHistoryVC
-        navigationController?.pushViewController(thvc, animated: false)
+    @IBAction func showTestHistory() {
+        close()
+//        let vc = storyboard?.instantiateViewController(withIdentifier: "TestHistoryVC")
+//        navigationController?.pushViewController(vc!, animated: false)
     }
     
-    @IBAction func btnSetting(_ sender: Any) {
-        let svc = storyboard?.instantiateViewController(withIdentifier: "SettingVC") as! SettingVC
-        navigationController?.pushViewController(svc, animated: false)
+    @IBAction func showTopicFilter() {
+        close()
+//        let vc = storyboard?.instantiateViewController(withIdentifier: "TopicFilterVC")
+//        navigationController?.pushViewController(vc!, animated: false)
     }
     
-    @IBAction func btnLogOut(_ sender: Any) {
-        Event.shared.logout()
+    @IBAction func openSettings() {
+        close()
+        let vc = storyboard?.instantiateViewController(withIdentifier: "SettingsVC")
+        navigationController?.pushViewController(vc!, animated: false)
+    }
+    
+    @IBAction func logout() {
+        UIAlertController.show(in: self,
+                               withTitle: "Warning",
+                               message: "Are you sure you want to log out?",
+                               actions: [
+                                UIAlertAction(title: "No", style: .cancel, handler: nil),
+                                UIAlertAction(title: "Yes", style: .destructive, handler: { _ in
+                                    self.close()
+                                    Event.shared.logout()
+                                })])
     }
     
 }

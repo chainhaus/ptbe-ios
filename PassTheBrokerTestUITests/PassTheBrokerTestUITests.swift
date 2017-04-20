@@ -1,10 +1,8 @@
-//
-//  PassTheBrokerTestUITests.swift
-//  PassTheBrokerTestUITests
-//
-//  Created by iSquare infoTech on 4/1/17.
-//  Copyright © 2017 MitsSoft. All rights reserved.
-//
+/*
+ 
+ Copyright © 2017 Override Labs. All Rights Reserved.
+ 
+ */
 
 import XCTest
 

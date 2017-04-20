@@ -1,15 +1,15 @@
-//
-//  Question.swift
-//  PassTheBrokerTest
-//
-//  Created by Aleksandr Poddubny on 18/04/2017.
-//  Copyright © 2017 MitsSoft. All rights reserved.
-//
+/*
+ 
+ Copyright © 2017 Override Labs. All Rights Reserved.
+ 
+ */
 
-import UIKit
 import RealmSwift
 
 class Question: Object {
+    
+    // MARK: - Entity declaration
+    
     dynamic var id = 0
     
     dynamic var topicId = 0
@@ -23,9 +23,21 @@ class Question: Object {
     dynamic var choice4 = ""
     dynamic var choice5 = ""
     
+    var topic: Topic! {
+        get {
+            return Topic.from(id: topicId, name: topicName)
+        }
+    }
+    
     override static func primaryKey() -> String? {
         return "id"
     }
+    
+    override static func ignoredProperties() -> [String] {
+        return ["topic"]
+    }
+    
+    // MARK: - Caching/Serialization
     
     static func cachedList() -> [Question] {
         let realm = try! Realm()

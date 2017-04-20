@@ -1,10 +1,8 @@
-//
-//  Api.swift
-//  PassTheBrokerTest
-//
-//  Created by Aleksandr Poddubny on 18/04/2017.
-//  Copyright © 2017 MitsSoft. All rights reserved.
-//
+/*
+ 
+ Copyright © 2017 Override Labs. All Rights Reserved.
+ 
+ */
 
 import UIKit
 import Alamofire
@@ -173,10 +171,10 @@ extension Api {
         
         request("submitSignUp",
                 method: .post,
-                body: ["email": email,
-                       "password": password,
-                       "fname": firstName,
-                       "lname": lastName]) {
+                body: ["email":     email,
+                       "password":  password,
+                       "fname":     firstName,
+                       "lname":     lastName]) {
                         
                         guard let response = $0 else {
                             // no response
@@ -291,6 +289,31 @@ extension Api {
                 callback(nil,
                          "Couldn't load questions bank. Please check your internet connection and try again later.")
             }
+        }
+    }
+}
+
+// MARK: - Tests
+
+extension Api {
+    
+    public func submitResult(of test: Test, callback: @escaping (_ submitted: Bool) -> Void) {
+        request("submitTestResult",
+                method: .post,
+                body: ["testName":          test.kind.textRepresentation(),
+                       "totalQuestions":    test.questionsCount,
+                       "answeredCorrect":   test.rightAnswersCount]) {
+                    if let response = $0 {
+                        guard let statusCode = response[kStatusCode] as? Int,
+                            statusCode == 0 else {
+                                callback(false)
+                                return
+                        }
+                        
+                        callback(true)
+                    } else {
+                        callback(false)
+                    }
         }
     }
 }

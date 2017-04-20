@@ -1,12 +1,10 @@
-//
-//  Event.swift
-//  PassTheBrokerTest
-//
-//  Created by Aleksandr Poddubny on 18/04/2017.
-//  Copyright © 2017 MitsSoft. All rights reserved.
-//
+/*
+ 
+ Copyright © 2017 Override Labs. All Rights Reserved.
+ 
+ */
 
-import UIKit
+import RealmSwift
 
 class Event {
 
@@ -27,5 +25,31 @@ class Event {
         Settings.shared.userEmail   = nil
         
         nc.post(name: kLogout, object: nil)
+    }
+    
+    // MARK: - Purchase
+    private let kPurchase = NSNotification.Name(rawValue: "Event_Purchase")
+    
+    public func onPurchase(execute block: @escaping () -> Void) {
+        nc.addObserver(forName: kPurchase, object: nil, queue: OperationQueue.main) { _ in
+            block()
+        }
+    }
+    
+    public func purchased() {
+        nc.post(name: kPurchase, object: nil)
+    }
+    
+    // MARK: - Open MainVC
+    private let kOpenMain = NSNotification.Name(rawValue: "Event_OpenMain")
+    
+    public func onOpenMain(execute block: @escaping () -> Void) {
+        nc.addObserver(forName: kOpenMain, object: nil, queue: OperationQueue.main) { _ in
+            block()
+        }
+    }
+    
+    public func openMain() {
+        nc.post(name: kOpenMain, object: nil)
     }
 }

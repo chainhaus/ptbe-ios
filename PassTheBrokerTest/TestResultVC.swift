@@ -20,7 +20,7 @@ class TestResultVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        scoreLabel.text = "\(test.score) %"
+        scoreLabel.text = String(format: ".2f %", test.score)
     }
     
     override func viewDidAppear(_ animated: Bool) {

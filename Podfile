@@ -7,4 +7,5 @@ target 'PassTheBrokerTest' do
   pod 'RealmSwift'
   pod 'ImageLoader'
   pod 'IQKeyboardManager'
+  pod 'SwiftyStoreKit'
 end

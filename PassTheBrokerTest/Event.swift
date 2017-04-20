@@ -52,4 +52,43 @@ class Event {
     public func openMain() {
         nc.post(name: kOpenMain, object: nil)
     }
+    
+    // MARK: - Open TestHistoryVC
+    private let kOpenTestHistory = NSNotification.Name(rawValue: "Event_TestHistory")
+    
+    public func onOpenTestHistory(execute block: @escaping () -> Void) {
+        nc.addObserver(forName: kOpenTestHistory, object: nil, queue: OperationQueue.main) { _ in
+            block()
+        }
+    }
+    
+    func openTestHistory() {
+        nc.post(name: kOpenTestHistory, object: nil)
+    }
+    
+    // MARK: - Open TopicFilterVC
+    private let kOpenTopicFilter = NSNotification.Name(rawValue: "Event_TopicFilter")
+    
+    public func onOpenTopicFilter(execute block: @escaping () -> Void) {
+        nc.addObserver(forName: kOpenTopicFilter, object: nil, queue: OperationQueue.main) { _ in
+            block()
+        }
+    }
+    
+    func openTopicFilter() {
+        nc.post(name: kOpenTopicFilter, object: nil)
+    }
+    
+    // MARK: - Open SettingsVC
+    private let kOpenSettings = NSNotification.Name(rawValue: "Event_OpenSettings")
+    
+    public func onOpenSettings(execute block: @escaping () -> Void) {
+        nc.addObserver(forName: kOpenSettings, object: nil, queue: OperationQueue.main) { _ in
+            block()
+        }
+    }
+    
+    func openSettings() {
+        nc.post(name: kOpenSettings, object: nil)
+    }
 }

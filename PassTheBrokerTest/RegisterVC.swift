@@ -57,6 +57,8 @@ class RegisterVC: UIViewController {
             errorString = "Please enter your password"
         } else if (passwordTextField.text?.characters.count)! > 15 {
             errorString = "Password shouldn't be longer than 15 digits"
+        } else if (passwordTextField.text?.characters.count)! < 6 {
+            errorString = "Password should be minimum 6 digits long"
         } else if passwordTextField.text != confirmPasswordTextField.text {
             errorString = "Passwords do not match"
         } else if firstNameTextField.text == "" {

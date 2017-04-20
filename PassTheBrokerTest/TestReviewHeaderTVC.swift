@@ -20,7 +20,9 @@ class TestReviewHeaderTVC: UITableViewCell {
             for topic in test.topics {
                 text.append(topic.name)
                 text.append(": ")
-                text.append(String(test.score(by: topic)))
+                text.append(String.format(test.score(by: topic),
+                                          precision: 2,
+                                          ignorePrecisionIfRounded: true))
                 text.append("%\n")
             }
             

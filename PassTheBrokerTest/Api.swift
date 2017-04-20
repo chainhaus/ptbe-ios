@@ -22,7 +22,7 @@ class Api {
     fileprivate func request(_ path: String,
                              method: HTTPMethod,
                              body: Parameters?,
-                      callback: @escaping ([String: Any]?) -> Void) {
+                      callback: @escaping (Any?) -> Void) {
         
         let urlString = kBaseUrlString.appending(path)
         
@@ -36,6 +36,7 @@ class Api {
             headers["EMAIL_KEY"] = userEmail
         }
         print("HTTP Headers for request: \(headers)")
+        print("Request params: \(body ?? [:])")
         
         Alamofire.request(urlString, method: method, parameters: body, headers: headers)
             .validate()
@@ -43,79 +44,15 @@ class Api {
                 switch $0.result {
                 case .success(let value):
                     print("Received response for '\(urlString)': \(value)")
-                    callback(value as? [String : Any])
+                    callback(value)
                 case .failure:
                     callback(nil)
                 }
         }
-        
-//        // generate query string
-//        var queryPairs: [String] = []
-//        for (key, value) in params {
-//            let pair = key
-//                .appending("=")
-//                .appending(value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!)
-//            queryPairs.append(pair)
-//        }
-//        let queryString = queryPairs.joined(separator: "&")
-//        
-//        // generate url string
-//        var urlString = kBaseUrlString.appending(path)
-//        if httpMethod == .get {
-//            urlString.append("?".appending(queryString))
-//        }
-//        
-//        // make request
-//        var request = URLRequest(url: URL(string: urlString)!,
-//                                 cachePolicy: .useProtocolCachePolicy,
-//                                 timeoutInterval: 10)
-//        request.httpMethod = httpMethod.rawValue
-//        
-//        if httpMethod != .get {
-//            request.httpBody = queryString.data(using: .utf8)
-//        }
-//        
-//        let headers = ["api_key": "abc123",
-//                       "content-type": "application/x-www-form-urlencoded",
-//                       "cache-control": "no-cache"]
-//        request.allHTTPHeaderFields = headers
-//        
-//        // prepare call
-//        let errorCallback = {
-//            OperationQueue.main.addOperation {
-//                callback(nil)
-//            }
-//        }
-//        
-//        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
-//            if let error = error {
-//                print("Caught an error on calling \(urlString): \(error.localizedDescription)")
-//                errorCallback()
-//            } else {
-//                do {
-//                    guard let response: [String: Any] =
-//                        try JSONSerialization.jsonObject(with: data!,
-//                                                         options: .mutableContainers) as? [String: Any]
-//                        else {
-//                            errorCallback()
-//                            return
-//                    }
-//                    
-//                    OperationQueue.main.addOperation {
-//                        callback(response)
-//                    }
-//                } catch (_) {
-//                    errorCallback()
-//                }
-//            }
-//        }
-//        
-//        // fire
-//        dataTask.resume()
     }
 }
 
-// MARK: - Log in / Register
+// MARK: - Log in / Register / Reset Password / Change Password
 
 extension Api {
     
@@ -126,7 +63,7 @@ extension Api {
         let defaultErrorString = "Couldn't authenticate"
         
         request("authenticateUser", method: .post, body: ["email": email, "password": password]) {
-            guard let response = $0 else {
+            guard let response = $0 as? [String : Any] else {
                 // no response
                 callback(false, "Coudn't connect to the server")
                 return
@@ -176,7 +113,7 @@ extension Api {
                        "fname":     firstName,
                        "lname":     lastName]) {
                         
-                        guard let response = $0 else {
+                        guard let response = $0 as? [String : Any] else {
                             // no response
                             callback(false, "Coudn't connect to the server")
                             return
@@ -200,6 +137,66 @@ extension Api {
                         }
         }
     }
+    
+    public func resetPassword(for email: String, callback: @escaping (_ resetted: Bool, _ errorString: String?) -> Void) {
+        let defaultErrorString = "Couldn't send reset password e-mail"
+        
+        request("resetPassword", method: .post, body: ["email": email]) {
+            
+            guard let response = $0 as? [String : Any] else {
+                // no response
+                callback(false, "Coudn't connect to the server")
+                return
+            }
+            
+            guard let statusCode = response[kStatusCode] as? Int
+                else {
+                    // wrong JSON structure
+                    callback(false, defaultErrorString)
+                    return
+            }
+            
+            if statusCode != 0 {
+                var errorString = defaultErrorString
+                if let providedErrorString = response[kStatus] as? String {
+                    errorString = providedErrorString
+                }
+                callback(false, errorString)
+            } else {
+                callback(true, nil)
+            }
+        }
+    }
+    
+    public func changePassword(to newPassword: String, callback: @escaping (_ changed: Bool, _ errorString: String?) -> Void) {
+        let defaultErrorString = "Couldn't change your password"
+        
+        request("changePassword", method: .post, body: ["newPassword": newPassword]) {
+            
+            guard let response = $0 as? [String : Any] else {
+                // no response
+                callback(false, "Coudn't connect to the server")
+                return
+            }
+            
+            guard let statusCode = response[kStatusCode] as? Int
+                else {
+                    // wrong JSON structure
+                    callback(false, defaultErrorString)
+                    return
+            }
+            
+            if statusCode != 0 {
+                var errorString = defaultErrorString
+                if let providedErrorString = response[kStatus] as? String {
+                    errorString = providedErrorString
+                }
+                callback(false, errorString)
+            } else {
+                callback(true, nil)
+            }
+        }
+    }
 }
 
 // MARK: - Ad
@@ -208,7 +205,7 @@ extension Api {
     
     public func receiveAd(callback: @escaping () -> Void) {
         request("getAd", method: .get, body: nil) {
-            if let response = $0 {
+            if let response = $0 as? [String : Any] {
                 if let adImageUrlString = response["adImageURL"] as? String,
                     let adClickUrlString = response["adClickURL"] as? String {
                     Settings.shared.adImageUrlString = adImageUrlString
@@ -231,14 +228,14 @@ extension Api {
     
     public func receiveVersion(callback: @escaping (_ versionIncreased: Bool) -> Void) {
         request("getVersion", method: .get, body: nil) {
-            if let response = $0 {
-                guard let appVersion = response["majorVersion"] as? Int else {
+            if let response = $0 as? [String : Any] {
+                guard let majorVersion = response["majorVersion"] as? Int else {
                     callback(false)
                     return
                 }
                 
-                callback(appVersion > Settings.shared.appVersion)
-                Settings.shared.appVersion = appVersion
+                callback(majorVersion > Settings.shared.appMajorVersion)
+                Settings.shared.appMajorVersion = majorVersion
             } else {
                 callback(false)
             }
@@ -250,9 +247,51 @@ extension Api {
 
 extension Api {
     
+    public func receiveTopics(_ callback: @escaping (_ questions: [Topic]?, _ errorString: String?) -> Void) {
+        request("getTopics", method: .get, body: nil) {
+            if let response = $0 as? [[String : Any]] {
+                let realm = try! Realm()
+                
+                var states: [Int: Bool] = [:]
+                
+                // delete cached
+                var topics = Topic.cachedList()
+                if topics.count > 0 {
+                    for topic in topics {
+                        states[topic.id] = topic.available
+                    }
+                    
+                    try! realm.write {
+                        realm.delete(topics)
+                    }
+                }
+                
+                // clear, and add from response
+                topics.removeAll()
+                for jsonObject in response {
+                    if let topic = Topic.from(jsonObject: jsonObject, states: states) {
+                        topics.append(topic)
+                    }
+                }
+                
+                callback(topics, nil)
+                
+                // save to database
+                try! realm.write {
+                    realm.add(topics)
+                }
+            } else {
+                callback(nil,
+                         "Couldn't load topics. Please check your internet connection and try again later.")
+            }
+        }
+    }
+    
     public func receiveQuestions(_ callback: @escaping (_ questions: [Question]?, _ errorString: String?) -> Void) {
-        request("getQuestionBank", method: .get, body: nil) {
-            if let response = $0 {
+        let path = Test.of(kind: Test.premiumKinds.first!).purchased ? "getQuestionBankPremium" : "getQuestionBank"
+        
+        request(path, method: .get, body: nil) {
+            if let response = $0 as? [String : Any] {
                 guard let statusCode = response[kStatusCode] as? Int,
                     let jsonArray = response["questions"] as? [[String : Any]],
                     statusCode == 0 else {
@@ -303,7 +342,7 @@ extension Api {
                 body: ["testName":          test.kind.textRepresentation(),
                        "totalQuestions":    test.questionsCount,
                        "answeredCorrect":   test.rightAnswersCount]) {
-                    if let response = $0 {
+                    if let response = $0 as? [String : Any] {
                         guard let statusCode = response[kStatusCode] as? Int,
                             statusCode == 0 else {
                                 callback(false)
@@ -314,6 +353,41 @@ extension Api {
                     } else {
                         callback(false)
                     }
+        }
+    }
+    
+    public func receiveTestHistory(_ callback: @escaping (_ testResults: [TestResult]?, _ errorString: String?) -> Void) {
+        request("getTestHistory", method: .get, body: nil) {
+            if let response = $0 as? [[String : Any]] {                
+                let realm = try! Realm()
+                
+                // delete cached
+                var testResults = TestResult.cachedList()
+                if testResults.count > 0 {
+                    try! realm.write {
+                        realm.delete(testResults)
+                    }
+                }
+                
+                // clear, and add from response
+                testResults.removeAll()
+                for jsonObject in response {
+                    if let testResult = TestResult.from(jsonObject: jsonObject) {
+                        testResults.append(testResult)
+                    }
+                }
+                
+                callback(testResults, nil)
+                
+                // save to database
+                try! realm.write {
+                    realm.add(testResults)
+                }
+            } else {
+                print("Invalid response")
+                callback(nil,
+                         "Couldn't load test history. Please check your internet connection and try again later.")
+            }
         }
     }
 }

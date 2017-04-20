@@ -6,18 +6,24 @@
 
 import Foundation
 import UIKit
+import MBProgressHUD
+import SwiftyStoreKit
+import RealmSwift
 
-class SettingsVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
+class SettingsVC: UIViewController {
     
-    let app = (UIApplication.shared.delegate as? AppDelegate)
+    // MARK: - Table Data
     
-    // MARK: - Variable
-    var arrTitle:NSMutableArray = ["Change Password","Restore Purchase"]
-    var arrSubTitle:NSMutableArray = ["Untill not change password","Get back your parchase"]
-    var arrImg:NSMutableArray = ["change-passwrd.png","restore.png"]
+    fileprivate var titles = ["Change Password",
+                              "Restore Purchase"]
+    fileprivate var subtitles = ["Request an e-mail",
+                                 "For premium access"]
+    fileprivate var icons = ["change-passwrd.png",
+                             "restore.png"]
     
     // MARK: - IBOutlet
-    @IBOutlet weak var tblSetting: UITableView!
+    
+    @IBOutlet weak var tableView: UITableView!
     
     // MARK: - Methods
     
@@ -25,111 +31,153 @@ class SettingsVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
         super.viewDidLoad()
     }
     
-    func resetPsw() {
-        
-        //        let rechability = Reachability()
-        
-        //        if rechability?.isReachable == true {
-        print("rechable")
-        let strURL = "\((app?.strService)! as String)resetPassword"
-        
-        let url:NSURL = NSURL(string: strURL)!
-        let session = URLSession.shared
-        let urlReq = NSMutableURLRequest(url: url as URL, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 60)
-        urlReq.httpMethod = "GET"
-        
-        urlReq.setValue("abc123", forHTTPHeaderField: "API_KEY")
-        urlReq.setValue("\(UserDefaults.standard.value(forKey: "userEmail") as! String)", forHTTPHeaderField: "EMAIL_KEY")
-        urlReq.setValue("\(UserDefaults.standard.value(forKey: "sessionKey") as! String)", forHTTPHeaderField: "SESSION_KEY")
-        
-        // make the request
-        let task = session.dataTask(with: urlReq as URLRequest, completionHandler: { (data, response, error) in
-            // do stuff with response, data & error here
-            print(error ?? "")
-            print(response ?? "NO Response")
-            
-            do {
-                let jsonDict = try JSONSerialization.jsonObject(with: data!, options: .mutableContainers) as! NSMutableDictionary
-                
-                print("Response : \(jsonDict)")
-                if jsonDict.isEqual(nil) {
-                    print("Error :\(error?.localizedDescription ?? "none")")
-                }
-                else {
-                    DispatchQueue.main.async {
-                        if  (jsonDict["errorCode"] as! NSInteger) < 0 {
-                            UIAlertController.show(okAlertIn: self,
-                                                   withTitle: "Warning",
-                                                   message: "Failed to sent email")
-                        }
-                        else {
-                            UIAlertController.show(okAlertIn: self,
-                                                   withTitle: "Warning",
-                                                   message: (jsonDict["status"] as? String?)!)
-                        }
-                        
-                    }
-                }
-            }
-            catch {
-                return
-            }
-        })
-        task.resume()
-        
-        //        }
-        //        else {
-        //            print("not rechable")
-        //            UIAlertController.show(okAlertIn: self,
-        //                                   withTitle: "Warning",
-        //                                   message: "Make sure your device is connected to the internet.")
-        //        }
+    func failedToSendPasswordChange(dueTo reason: String) {
+        UIAlertController.show(okAlertIn: self, withTitle: "Warning", message: reason) { 
+            self.changePassword()
+        }
     }
     
+    func changePassword() {
+        let alert = UIAlertController(title: "Change password",
+                                      message: "",
+                                      preferredStyle: .alert)
+        alert.addTextField { $0.placeholder = "New password" }
+        alert.addTextField { $0.placeholder = "Confirm password" }
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "Change", style: .default, handler: { _ in
+            if let newPassword = alert.textFields?[0].text,
+                let confirmPassword = alert.textFields?[1].text {
+
+                if newPassword.characters.count < 6 {
+                    self.failedToSendPasswordChange(dueTo: "Password should be minimum 6 digits long")
+                    return
+                }
+                
+                if newPassword.characters.count > 15 {
+                    self.failedToSendPasswordChange(dueTo: "Password shouldn't be longer than 15 digits")
+                    return
+                }
+                
+                if newPassword != confirmPassword {
+                    self.failedToSendPasswordChange(dueTo: "Passwords do not match")
+                    return
+                }
+                
+                MBProgressHUD.showAdded(to: self.view, animated: true)
+                
+                Api.shared.changePassword(to: newPassword, callback: {
+                    MBProgressHUD.hide(for: self.view, animated: true)
+                    
+                    if let errorString = $1 {
+                        // failed to restore password
+                        UIAlertController.show(okAlertIn: self, withTitle: "Warning", message: errorString)
+                    } else {
+                        // successfully sent email
+                        UIAlertController.show(okAlertIn: self,
+                                               withTitle: "Congratulations",
+                                               message: "Your password has been successfully changed")
+                    }
+                })
+            }
+        }))
+        present(alert, animated: true, completion: nil)
+        
+        MBProgressHUD.showAdded(to: view, animated: true)
+        
+        Api.shared.changePassword(to: "", callback: {
+            MBProgressHUD.hide(for: self.view, animated: true)
+            
+            if let errorString = $1 {
+                UIAlertController.show(okAlertIn: self,
+                                       withTitle: "Warning",
+                                       message: errorString)
+            } else {
+                UIAlertController.show(okAlertIn: self,
+                                       withTitle: "Congratulations",
+                                       message: "Your password was successfully changed")
+            }
+        })
+    }
+    
+    func restorePurchase() {
+        let productId = "PTBE1NYSALES"
+        
+        SwiftyStoreKit.restorePurchases(atomically: true) { results in
+            var hasPurchase = false
+            for product in results.restoredProducts {
+                if product.productId == productId {
+                    hasPurchase = true
+                    break
+                }
+            }
+            
+            if hasPurchase {
+                UIAlertController.show(okAlertIn: self,
+                                       withTitle: "Congratulations",
+                                       message: "Your premium access was successfully restored.",
+                                       callback: {
+                                        // Tests will be updated, and questions will be loaded
+                                        Event.shared.purchased()
+                })
+            } else {
+                UIAlertController.show(okAlertIn: self,
+                                       withTitle: "Warning",
+                                       message: "Nothing to restore")
+            }
+        }
+    }
     
     // MARK: - Action Methods
     
-    @IBAction func btnMenu(_ sender: Any) {
-        let mvc = storyboard?.instantiateViewController(withIdentifier: "MenuVC") as! MenuVC
-        navigationController?.pushViewController(mvc, animated: false)
+    @IBAction func openMenu() {
+        let vc = storyboard?.instantiateViewController(withIdentifier: "MenuVC")
+        present(vc!, animated: true, completion: nil)
     }
     
-    @IBAction func btnLogOut(_ sender: Any) {
-        Event.shared.logout()
+    @IBAction func logout() {
+        UIAlertController.show(in: self,
+                               withTitle: "Warning",
+                               message: "Are you sure you want to log out?",
+                               actions: [
+                                UIAlertAction(title: "No", style: .cancel, handler: nil),
+                                UIAlertAction(title: "Yes", style: .destructive, handler: { _ in
+                                    Event.shared.logout()
+                                })])
     }
-    
-    // MARK: - Table View Delegate
-    
-    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 2
-    }
-    
-    public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "SettingCell") as! SettingCell
-        
-        cell.BGView.layer.cornerRadius = 10
-        cell.BGView.layer.borderColor = UIColor.gray.cgColor
-        cell.BGView.layer.borderWidth = 1
-        
-        cell.lblTitle.text = arrTitle[indexPath.row] as? String
-        cell.lblSubTitle.text = arrSubTitle[indexPath.row] as? String
-        
-        cell.imgTitle.image = UIImage(named: (arrImg[indexPath.row] as? String)!)
-        
-        return cell
-    }
+}
+
+// MARK: - UITableViewDelegate
+
+extension SettingsVC: UITableViewDelegate {
     
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.row == 0 {
-            resetPsw()
+            changePassword()
+        } else {
+            restorePurchase()
         }
     }
 }
 
-class SettingCell : UITableViewCell {
+// MARK: - UITableViewDataSource
+
+extension SettingsVC: UITableViewDataSource {
     
-    @IBOutlet weak var BGView: UIView!
-    @IBOutlet weak var lblTitle: UILabel!
-    @IBOutlet weak var lblSubTitle: UILabel!
-    @IBOutlet weak var imgTitle: UIImageView!
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return 1
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return titles.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell",
+                                                 for: indexPath) as! SettingsTVC
+        cell.titleLabel.text        = titles[indexPath.row]
+        cell.subtitleLabel.text     = subtitles[indexPath.row]
+        cell.iconImageView.image    = UIImage.init(named: icons[indexPath.row])
+        
+        return cell
+    }
 }

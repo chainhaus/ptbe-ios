@@ -43,16 +43,20 @@ class LoginVC: UIViewController {
     
     // MARK: - Action Methods
     
-    @IBAction func login() {
+    private func isValid(email: String) -> Bool {
         let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
         let emailTest = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
-        let match = emailTest.evaluate(with: emailTextField.text)
+        let match = emailTest.evaluate(with: email)
         
+        return match
+    }
+    
+    @IBAction func login() {
         var errorString: String?
         
         if emailTextField.text == "" {
             errorString = "Please enter your e-mail"
-        } else if !match {
+        } else if !isValid(email: emailTextField.text!) {
             errorString = "Please enter valid e-mail"
         } else if (emailTextField.text?.characters.count)! > 254 {
             errorString = "Too long e-mail address"
@@ -60,6 +64,8 @@ class LoginVC: UIViewController {
             errorString = "Please enter your password"
         } else if (passwordTextField.text?.characters.count)! > 15 {
             errorString = "Password shouldn't be longer than 15 digits"
+        } else if (passwordTextField.text?.characters.count)! < 6 {
+            errorString = "Password should be minimum 6 digits long"
         }
         
         if let errorString = errorString {
@@ -88,6 +94,42 @@ class LoginVC: UIViewController {
         if let rvc = storyboard?.instantiateViewController(withIdentifier: "RegisterVC") {
             navigationController?.pushViewController(rvc, animated: true)
         }
+    }
+    
+    @IBAction func restorePassword() {
+        let alert = UIAlertController(title: "Restore password",
+                                      message: "We will send you restoration link to your e-mail address",
+                                      preferredStyle: .alert)
+        alert.addTextField { $0.placeholder = "E-mail" }
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "Send", style: .default, handler: { _ in
+            if let email = alert.textFields?[0].text {
+                
+                if email == "" || !self.isValid(email: email) {
+                    UIAlertController.show(okAlertIn: self, withTitle: "Warning", message: "Enter valid e-mail") {
+                        self.restorePassword()
+                    }
+                    return
+                }
+                
+                MBProgressHUD.showAdded(to: self.view, animated: true)
+                
+                Api.shared.resetPassword(for: email, callback: {
+                    MBProgressHUD.hide(for: self.view, animated: true)
+                    
+                    if let errorString = $1 {
+                        // failed to restore password
+                        UIAlertController.show(okAlertIn: self, withTitle: "Warning", message: errorString)
+                    } else {
+                        // successfully sent email
+                        UIAlertController.show(okAlertIn: self,
+                                               withTitle: "Congratulations",
+                                               message: "An URL to restore your password was just sent to your e-mail address")
+                    }
+                })
+            }
+        }))
+        present(alert, animated: true, completion: nil)
     }
 }
 

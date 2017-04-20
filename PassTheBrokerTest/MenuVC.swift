@@ -17,7 +17,7 @@ class MenuVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        versionLabel.text = "Version: \(Settings.shared.appVersion)"
+        versionLabel.text = "DB v\(Settings.shared.appMajorVersion).\(Settings.shared.appMinorVersion)"
     }
     
     // MARK: - Action Methods
@@ -27,26 +27,27 @@ class MenuVC: UIViewController {
     }
     
     @IBAction func takeATest() {
-        close()
-        Event.shared.openMain()
+        dismiss(animated: false) {
+            Event.shared.openMain()
+        }
     }
     
-    @IBAction func showTestHistory() {
-        close()
-//        let vc = storyboard?.instantiateViewController(withIdentifier: "TestHistoryVC")
-//        navigationController?.pushViewController(vc!, animated: false)
+    @IBAction func openTestHistory() {
+        dismiss(animated: false) {
+            Event.shared.openTestHistory()
+        }
     }
     
-    @IBAction func showTopicFilter() {
-        close()
-//        let vc = storyboard?.instantiateViewController(withIdentifier: "TopicFilterVC")
-//        navigationController?.pushViewController(vc!, animated: false)
+    @IBAction func openTopicFilter() {
+        dismiss(animated: false) {
+            Event.shared.openTopicFilter()
+        }
     }
     
     @IBAction func openSettings() {
-        close()
-        let vc = storyboard?.instantiateViewController(withIdentifier: "SettingsVC")
-        navigationController?.pushViewController(vc!, animated: false)
+        dismiss(animated: false) {
+            Event.shared.openSettings()
+        }
     }
     
     @IBAction func logout() {

@@ -87,10 +87,13 @@ class TestVC: UIViewController {
         MBProgressHUD.showAdded(to: view, animated: true)
         
         Api.shared.submitResult(of: test) { submitted in
-            MBProgressHUD.hide(for: self.view, animated: true)
             if submitted {
-                self.openResult()
+                Api.shared.receiveTestHistory { _ in
+                    MBProgressHUD.hide(for: self.view, animated: true)
+                    self.openResult()
+                }
             } else {
+                MBProgressHUD.hide(for: self.view, animated: true)
                 UIAlertController.show(in: self,
                                        withTitle: "Warning",
                                        message: "Failed to submit your test result.\nDo you want to retry? Otherwise, your result will be lost.",

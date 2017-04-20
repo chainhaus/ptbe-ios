@@ -7,21 +7,36 @@
 import UIKit
 import IQKeyboardManager
 import RealmSwift
+import SwiftyStoreKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-
-    let strService = "http://52.206.94.249:5000/api/1/" // This should be moved out of here
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         
         IQKeyboardManager.shared().isEnabled = true
+        
+        // Apple recommends to register a transaction observer as soon as the app starts:
+        //
+        // - Adding your app's observer at launch ensures that it will persist during all launches of your app, 
+        //   thus allowing your app to receive all the payment queue notifications.
+        SwiftyStoreKit.completeTransactions(atomically: true) { products in
+            for product in products {
+                if product.transaction.transactionState == .purchased || product.transaction.transactionState == .restored {
+                    
+                    if product.needsFinishTransaction {
+                        SwiftyStoreKit.finishTransaction(product.transaction)
+                    }
+                }
+            }
+        }
       
         // Make Realm encrypt all data
         autoreleasepool {
-            let configuration = Realm.Configuration(encryptionKey: getKey() as Data)
+            let configuration = Realm.Configuration(encryptionKey: getKey() as Data, migrationBlock: { _ in
+            })
             do {
                 _ = try Realm(configuration: configuration)
                 Realm.Configuration.defaultConfiguration = configuration

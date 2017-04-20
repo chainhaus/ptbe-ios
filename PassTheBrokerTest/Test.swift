@@ -73,18 +73,12 @@ class Test: Object {
         }
         
         Event.shared.onPurchase {
-            var tests: [Test] = []
+            let realm = try! Realm()
             
             for kind in premiumKinds {
                 let test: Test = of(kind: kind)
-                test.purchased = true
-                tests.append(test)
-            }
-            
-            if tests.count > 0 {
-                let realm = try! Realm()
                 try! realm.write {
-                    realm.add(tests)
+                    test.purchased = true
                 }
             }
         }
@@ -104,16 +98,55 @@ class Test: Object {
         return counts[self.kind]!
     }()
     
-    public lazy var questions: [Question] = {
-        var questions: [Question] = []
-        
-        let cachedList = Question.cachedList()
-        for _ in 1...self.questionsCount {
-            var question: Question!
-            while question == nil || questions.contains(question) {
-                question = cachedList[Int(arc4random_uniform(UInt32(cachedList.count)))]
+    public var hasEnoughAvailableTopics: Bool {
+        get {
+            var availableTopics: [Topic] = []
+            
+            for topic in Topic.cachedList() {
+                if topic.available {
+                    availableTopics.append(topic)
+                }
             }
             
+            let cachedList = Question.cachedList()
+            var questionsFound = 0
+            
+            for question in cachedList {
+                if availableTopics.contains(question.topic) {
+                    questionsFound += 1
+                }
+                
+                if questionsFound == questionsCount {
+                    return true
+                }
+            }
+            
+            return false
+        }
+    }
+    
+    public lazy var questions: [Question] = {
+        var questions: [Question] = []
+        var availableTopics: [Topic] = []
+        
+        for topic in Topic.cachedList() {
+            if topic.available {
+                availableTopics.append(topic)
+            }
+        }
+        
+        let cachedList = Question.cachedList()
+        
+        var questionsForAvailableTopics: [Question] = []
+        for question in cachedList {
+            if availableTopics.contains(question.topic) {
+                questionsForAvailableTopics.append(question)
+            }
+        }
+        
+        for _ in 1...self.questionsCount {
+            let question: Question = questionsForAvailableTopics[Int(arc4random_uniform(UInt32(questionsForAvailableTopics.count)))]
+            questionsForAvailableTopics.remove(at: questionsForAvailableTopics.index(of: question)!)
             questions.append(question)
         }
         
@@ -147,9 +180,9 @@ class Test: Object {
         }
     }
     
-    var score: Int {
+    var score: Double {
         get {
-            return Int(round(Double(rightAnswersCount) / Double(questionsCount) * 100.0))
+            return Double(rightAnswersCount) / Double(questionsCount) * 100.0
         }
     }
     
@@ -166,7 +199,7 @@ class Test: Object {
         }
     }
     
-    public func score(by topic: Topic) -> Int {
+    public func score(by topic: Topic) -> Double {
         var rightAnswersCount = 0
         for question in questions {
             if question.topic == topic && answer(for: question) == question.answer {
@@ -174,6 +207,6 @@ class Test: Object {
             }
         }
         
-        return Int(round(Double(rightAnswersCount) / Double(questionsCount) * 100.0))
+        return Double(rightAnswersCount) / Double(questionsCount) * 100.0
     }
 }

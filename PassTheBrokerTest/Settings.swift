@@ -56,12 +56,22 @@ class Settings {
     }
     
     // MARK: - App Version
-    private let kAppVersion = "Settings_appVersion"
-    var appVersion: Int {
+    private let kAppMajorVersion = "Settings_appMajorVersion"
+    var appMajorVersion: Int {
         get {
-            return ud.integer(forKey: kAppVersion)
+            return ud.integer(forKey: kAppMajorVersion)
         } set {
-            ud.set(newValue, forKey: kAppVersion)
+            ud.set(newValue, forKey: kAppMajorVersion)
+            ud.synchronize()
+        }
+    }
+    
+    private let kAppMinorVersion = "Settings_appMinorVersion"
+    var appMinorVersion: Int {
+        get {
+            return ud.integer(forKey: kAppMinorVersion)
+        } set {
+            ud.set(newValue, forKey: kAppMinorVersion)
             ud.synchronize()
         }
     }

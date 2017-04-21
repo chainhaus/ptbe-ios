@@ -77,6 +77,7 @@ class Test: Object {
             
             for kind in premiumKinds {
                 let test: Test = of(kind: kind)
+                print("Write purchased test \(test.kind)")
                 try! realm.write {
                     test.purchased = true
                 }
@@ -145,7 +146,7 @@ class Test: Object {
         }
         
         for _ in 1...self.questionsCount {
-            let question: Question = questionsForAvailableTopics[Int(arc4random_uniform(UInt32(questionsForAvailableTopics.count)))]
+            let question = questionsForAvailableTopics[Int(arc4random_uniform(UInt32(questionsForAvailableTopics.count)))]
             questionsForAvailableTopics.remove(at: questionsForAvailableTopics.index(of: question)!)
             questions.append(question)
         }
@@ -171,7 +172,8 @@ class Test: Object {
         get {
             var rightAnswersCount = 0
             for (question, choice) in answers {
-                if choice == question.answer {
+//                print("Question \(question.question) has answer: \(choice), while right is: \(question.answer)")
+                if choice == question.answer - 1 { // remove 1 due to starting from 1, not zero
                     rightAnswersCount += 1
                 }
             }
@@ -182,6 +184,7 @@ class Test: Object {
     
     var score: Double {
         get {
+//            print("Right answers count: \(rightAnswersCount), questions count: \(questionsCount), score: \(Double(rightAnswersCount) / Double(questionsCount) * 100.0)")
             return Double(rightAnswersCount) / Double(questionsCount) * 100.0
         }
     }
@@ -201,11 +204,17 @@ class Test: Object {
     
     public func score(by topic: Topic) -> Double {
         var rightAnswersCount = 0
+        var questionsCount = 0
         for question in questions {
-            if question.topic == topic && answer(for: question) == question.answer {
-                rightAnswersCount += 1
+            if question.topic == topic {
+                questionsCount += 1
+                
+                if answer(for: question) == question.answer - 1 { // remove 1 due to starting from 1, not zero
+                    rightAnswersCount += 1
+                }
             }
         }
+//        print("Score by topic. Right answers count: \(rightAnswersCount), questions count: \(questionsCount), score: \(Double(rightAnswersCount) / Double(questionsCount) * 100.0)")
         
         return Double(rightAnswersCount) / Double(questionsCount) * 100.0
     }

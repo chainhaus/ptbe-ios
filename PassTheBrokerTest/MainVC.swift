@@ -27,9 +27,9 @@ class MainVC: UIViewController {
         super.viewDidLoad()
                 
         // Check whether we need to update local database
-        if Settings.shared.versionShouldUpdate || Question.cachedList().count == 0 {
+        if Settings.shared.versionShouldUpdate || Question.cachedList().count == 0 || true {
             Api.shared.receiveVersion(callback: { versionChanged in
-                if versionChanged {
+                if versionChanged || true {
                     self.loadQuestions(callback: nil)
                 }
             })
@@ -135,6 +135,36 @@ class MainVC: UIViewController {
     
     // MARK: - Action Methods
     
+    func submitPurchase(testButton: TestButton, kind: Test.Kind) {
+        MBProgressHUD.showAdded(to: view, animated: true)
+        
+        Api.shared.submitPurchase(callback: {
+            MBProgressHUD.hide(for: self.view, animated: true)
+            
+            if $0 {
+                UIAlertController.show(okAlertIn: self,
+                                       withTitle: "Congratulations",
+                                       message: "Payment has been placed successfully. Now, you will be redirected to the test.",
+                                       callback: {
+                                        // Tests will be updated, and questions will be loaded
+                                        Event.shared.purchased()
+                                        // Also, all questions must be deleted, and await full list download
+                                        self.openTest(testButton: testButton, kind: kind)
+                })
+            } else {
+                UIAlertController.show(in: self,
+                                       withTitle: "Warning",
+                                       message: "Payment was successful, but couldn't activate your premium access.\nYou can either retry now or later from settings.",
+                                       actions: [
+                                        UIAlertAction(title: "Later", style: .destructive, handler: nil),
+                                        UIAlertAction(title: "Now", style: .default, handler: { _ in
+                                            self.submitPurchase(testButton: testButton, kind: kind)
+                                        })
+                    ])
+            }
+        })
+    }
+    
     func purchase(testButton: TestButton, kind: Test.Kind) {
         let productId = "PTBE1NYSALES"
         
@@ -149,15 +179,7 @@ class MainVC: UIViewController {
                     }
                 }
                 
-                UIAlertController.show(okAlertIn: self,
-                                       withTitle: "Congratulations",
-                                       message: "Payment has been placed successfully. Now, you will be redirected to the test.",
-                                       callback: {
-                                        // Tests will be updated, and questions will be loaded
-                                        Event.shared.purchased()
-                                        // Also, all questions must be deleted, and await full list download
-                                        self.openTest(testButton: testButton, kind: kind)
-                })
+                self.submitPurchase(testButton: testButton, kind: kind)
             case .error(let error):
                 var errorString: String!
                 

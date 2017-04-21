@@ -39,6 +39,10 @@ class Question: Object {
     
     // MARK: - Caching/Serialization
     
+    static func cachedList(realm: Realm) -> [Question] {
+        return realm.objects(Question.self).map { $0 }
+    }
+    
     static func cachedList() -> [Question] {
         let realm = try! Realm()
         return realm.objects(Question.self).map { $0 }

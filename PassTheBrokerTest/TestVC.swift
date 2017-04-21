@@ -75,7 +75,7 @@ class TestVC: UIViewController {
         choice3Button.setTitle(question.choice3, for: .normal)
         choice4Button.setTitle(question.choice4, for: .normal)
         choice5Button.setTitle(question.choice5, for: .normal)
-        
+                
         choiceIndex = test.answer(for: question) // this will select answer if were previously made, otherwise clear all
         
         // toggle back and forward buttons

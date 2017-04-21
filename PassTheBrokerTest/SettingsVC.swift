@@ -41,8 +41,10 @@ class SettingsVC: UIViewController {
         let alert = UIAlertController(title: "Change password",
                                       message: "",
                                       preferredStyle: .alert)
+        
         alert.addTextField { $0.placeholder = "New password" }
         alert.addTextField { $0.placeholder = "Confirm password" }
+//        
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
         alert.addAction(UIAlertAction(title: "Change", style: .default, handler: { _ in
             if let newPassword = alert.textFields?[0].text,
@@ -80,21 +82,34 @@ class SettingsVC: UIViewController {
                 })
             }
         }))
-        present(alert, animated: true, completion: nil)
         
+        present(alert, animated: true, completion: nil)
+    }
+    
+    func submitPurchase() {
         MBProgressHUD.showAdded(to: view, animated: true)
         
-        Api.shared.changePassword(to: "", callback: {
+        Api.shared.submitPurchase(callback: {
             MBProgressHUD.hide(for: self.view, animated: true)
             
-            if let errorString = $1 {
-                UIAlertController.show(okAlertIn: self,
-                                       withTitle: "Warning",
-                                       message: errorString)
-            } else {
+            if $0 {
                 UIAlertController.show(okAlertIn: self,
                                        withTitle: "Congratulations",
-                                       message: "Your password was successfully changed")
+                                       message: "Your premium access was successfully restored.",
+                                       callback: {
+                                        // Tests will be updated, and questions will be loaded
+                                        Event.shared.purchased()
+                })
+            } else {
+                UIAlertController.show(in: self,
+                                       withTitle: "Warning",
+                                       message: "Payment was successful, but couldn't activate your premium access.\nYou can either retry now or later.",
+                                       actions: [
+                                        UIAlertAction(title: "Later", style: .destructive, handler: nil),
+                                        UIAlertAction(title: "Now", style: .default, handler: { _ in
+                                            self.submitPurchase()
+                                        })
+                    ])
             }
         })
     }
@@ -112,13 +127,7 @@ class SettingsVC: UIViewController {
             }
             
             if hasPurchase {
-                UIAlertController.show(okAlertIn: self,
-                                       withTitle: "Congratulations",
-                                       message: "Your premium access was successfully restored.",
-                                       callback: {
-                                        // Tests will be updated, and questions will be loaded
-                                        Event.shared.purchased()
-                })
+                self.submitPurchase()
             } else {
                 UIAlertController.show(okAlertIn: self,
                                        withTitle: "Warning",

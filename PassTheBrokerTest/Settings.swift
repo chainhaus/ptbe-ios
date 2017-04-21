@@ -86,7 +86,7 @@ class Settings {
             
             let now = Date().timeIntervalSince1970
             let versionLastChecked = ud.double(forKey: kVersionLastChecked)
-            
+            print("versionLastChecked: \(versionLastChecked), now = \(now)")
             if now - versionLastChecked > 86400.0 {
                 ud.set(now, forKey: kVersionLastChecked)
                 ud.synchronize()

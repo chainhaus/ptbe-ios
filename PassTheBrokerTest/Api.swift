@@ -83,11 +83,24 @@ extension Api {
                 }
                 callback(false, errorString)
             } else {
-                guard let sessionKey = response["sessionUUID"] as? String
+                guard let sessionKey = response["sessionUUID"] as? String,
+                    let premiumUser = response["premiumUser"] as? Bool
                     else {
                         // wrong JSON structure for successful response
                         callback(false, defaultErrorString)
                         return
+                }
+                
+                if Test.of(kind: Test.premiumKinds.first!).purchased != premiumUser {
+                    // change tests' purchase state and wipe questions to load them on opening mainVC
+                    let realm = try! Realm()
+                    try! realm.write {
+                        for kind in Test.premiumKinds {
+                            Test.of(kind: kind).purchased = premiumUser
+                        }
+                        
+                        realm.delete(Question.cachedList(realm: realm))
+                    }
                 }
                 
                 Settings.shared.sessionKey = sessionKey
@@ -229,13 +242,17 @@ extension Api {
     public func receiveVersion(callback: @escaping (_ versionIncreased: Bool) -> Void) {
         request("getVersion", method: .get, body: nil) {
             if let response = $0 as? [String : Any] {
-                guard let majorVersion = response["majorVersion"] as? Int else {
+                guard let majorVersion = response["majorVersion"] as? Int,
+                    let minorVersion = response["minorVersion"] as? Int
+                    
+                    else {
                     callback(false)
                     return
                 }
                 
                 callback(majorVersion > Settings.shared.appMajorVersion)
                 Settings.shared.appMajorVersion = majorVersion
+                Settings.shared.appMinorVersion = minorVersion
             } else {
                 callback(false)
             }
@@ -255,19 +272,15 @@ extension Api {
                 var states: [Int: Bool] = [:]
                 
                 // delete cached
-                var topics = Topic.cachedList()
-                if topics.count > 0 {
-                    for topic in topics {
+                let topicsToDelete = Topic.cachedList(realm: realm)
+                if topicsToDelete.count > 0 {
+                    for topic in topicsToDelete {
                         states[topic.id] = topic.available
-                    }
-                    
-                    try! realm.write {
-                        realm.delete(topics)
                     }
                 }
                 
                 // clear, and add from response
-                topics.removeAll()
+                var topics: [Topic] = []
                 for jsonObject in response {
                     if let topic = Topic.from(jsonObject: jsonObject, states: states) {
                         topics.append(topic)
@@ -278,6 +291,10 @@ extension Api {
                 
                 // save to database
                 try! realm.write {
+                    if topicsToDelete.count > 0 {
+                        realm.delete(topicsToDelete)
+                    }
+                    
                     realm.add(topics)
                 }
             } else {
@@ -303,17 +320,16 @@ extension Api {
                 let realm = try! Realm()
                 
                 // delete cached
-                var questions = Question.cachedList()
-                if questions.count > 0 {
-                    try! realm.write {
-                        realm.delete(questions)
-                    }
-                }
+                let questionsToDelete = Question.cachedList(realm: realm)
                 
                 // clear, and add from response
-                questions.removeAll()
+                var questions: [Question] = []
+                var questionIds: [Int] = []
+                
                 for jsonObject in jsonArray {
-                    if let question = Question.from(jsonObject: jsonObject) {
+                    if let question = Question.from(jsonObject: jsonObject),
+                        !questionIds.contains(question.id) {
+                        questionIds.append(question.id)
                         questions.append(question)
                     }
                 }
@@ -321,13 +337,36 @@ extension Api {
                 callback(questions, nil)
                 
                 // save to database
+                print("Write \(questions.count) questions")
                 try! realm.write {
+                    if questionsToDelete.count > 0 {
+                        realm.delete(questionsToDelete)
+                    }
+                    
                     realm.add(questions)
                 }
             } else {
                 callback(nil,
                          "Couldn't load questions bank. Please check your internet connection and try again later.")
             }
+        }
+    }
+    
+    public func submitPurchase(callback: @escaping (_ submitted: Bool) -> Void) {
+        request("purchaseInAppMade",
+                method: .post,
+                body: nil) {
+                        if let response = $0 as? [String : Any] {
+                            guard let statusCode = response[kStatusCode] as? Int,
+                                statusCode == 0 else {
+                                    callback(false)
+                                    return
+                            }
+                            
+                            callback(true)
+                        } else {
+                            callback(false)
+                        }
         }
     }
 }
@@ -362,15 +401,10 @@ extension Api {
                 let realm = try! Realm()
                 
                 // delete cached
-                var testResults = TestResult.cachedList()
-                if testResults.count > 0 {
-                    try! realm.write {
-                        realm.delete(testResults)
-                    }
-                }
+                var testResultsToDelete = TestResult.cachedList()
                 
                 // clear, and add from response
-                testResults.removeAll()
+                var testResults: [TestResult] = []
                 for jsonObject in response {
                     if let testResult = TestResult.from(jsonObject: jsonObject) {
                         testResults.append(testResult)
@@ -381,6 +415,10 @@ extension Api {
                 
                 // save to database
                 try! realm.write {
+                    if testResultsToDelete.count > 0 {
+                        realm.delete(testResultsToDelete)
+                    }
+                    
                     realm.add(testResults)
                 }
             } else {

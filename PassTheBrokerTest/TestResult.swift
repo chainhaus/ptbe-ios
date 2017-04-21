@@ -31,6 +31,10 @@ class TestResult: Object {
     
     // MARK: - Caching/Serialization
     
+    static func cachedList(realm: Realm) -> [TestResult] {
+        return realm.objects(TestResult.self).map { $0 }
+    }
+    
     static func cachedList() -> [TestResult] {
         let realm = try! Realm()
         return realm.objects(TestResult.self).map { $0 }

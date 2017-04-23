@@ -91,20 +91,13 @@ extension Api {
                         return
                 }
                 
-                if Test.of(kind: Test.premiumKinds.first!).purchased != premiumUser {
-                    // change tests' purchase state and wipe questions to load them on opening mainVC
-                    let realm = try! Realm()
-                    try! realm.write {
-                        for kind in Test.premiumKinds {
-                            Test.of(kind: kind).purchased = premiumUser
-                        }
-                        
-                        realm.delete(Question.cachedList(realm: realm))
-                    }
-                }
-                
                 Settings.shared.sessionKey = sessionKey
                 Settings.shared.userEmail = email
+                            
+                if Test.of(kind: Test.premiumKinds.first!).purchased != premiumUser {
+                    // silently try to send purchase to API
+                    self.submitPurchase(callback: nil)
+                }
                 
                 callback(true, nil)
             }
@@ -219,12 +212,26 @@ extension Api {
     public func receiveAd(callback: @escaping () -> Void) {
         request("getAd", method: .get, body: nil) {
             if let response = $0 as? [String : Any] {
-                if let adImageUrlString = response["adImageURL"] as? String,
-                    let adClickUrlString = response["adClickURL"] as? String {
-                    Settings.shared.adImageUrlString = adImageUrlString
-                    Settings.shared.adClickUrlString = adClickUrlString
-                } else {
-                    // silent
+                let realm = try! Realm()
+                
+                // delete cached
+                let adsToDelete = Ad.cachedList(realm: realm)
+                
+                // clear, and add from response
+                var ads: [Ad] = []
+                
+                // TODO: currently, only current Ad
+                if let ad = Ad.from(jsonObject: response) {
+                    ads.append(ad)
+                }
+                
+                // save to database
+                try! realm.write {
+                    if adsToDelete.count > 0 {
+                        realm.delete(adsToDelete)
+                    }
+                    
+                    realm.add(ads)
                 }
             } else {
                 // silent
@@ -352,20 +359,26 @@ extension Api {
         }
     }
     
-    public func submitPurchase(callback: @escaping (_ submitted: Bool) -> Void) {
+    public func submitPurchase(callback: ((_ submitted: Bool) -> Void)?) {
         request("purchaseInAppMade",
                 method: .post,
                 body: nil) {
                         if let response = $0 as? [String : Any] {
                             guard let statusCode = response[kStatusCode] as? Int,
                                 statusCode == 0 else {
-                                    callback(false)
+                                    if let callback = callback {
+                                        callback(false)
+                                    }
                                     return
                             }
                             
-                            callback(true)
+                            if let callback = callback {
+                                callback(true)
+                            }
                         } else {
-                            callback(false)
+                            if let callback = callback {
+                                callback(false)
+                            }
                         }
         }
     }

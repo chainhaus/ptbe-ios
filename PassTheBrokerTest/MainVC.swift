@@ -27,12 +27,24 @@ class MainVC: UIViewController {
         super.viewDidLoad()
                 
         // Check whether we need to update local database
-        if Settings.shared.versionShouldUpdate || Question.cachedList().count == 0 || true {
+        let hasNoCachedAdsOnLaunch = Ad.cachedList().count == 0
+        
+        if Settings.shared.versionShouldUpdate || Question.cachedList().count == 0 {
             Api.shared.receiveVersion(callback: { versionChanged in
-                if versionChanged || true {
+                if versionChanged {
                     self.loadQuestions(callback: nil)
                 }
             })
+            
+            // Ask for ads only if premium isn't yet activated
+            if !Test.of(kind: Test.premiumKinds.first!).purchased {
+                Api.shared.receiveAd {
+                    if hasNoCachedAdsOnLaunch {
+                        // force first launch ads
+                        self.adView.load()
+                    }
+                }
+            }
         }
         
         // Get most recent test history

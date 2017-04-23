@@ -33,28 +33,6 @@ class Settings {
         }
     }
     
-    // MARK: - Ad Image URL
-    private let kAdImageUrlString = "Settings_adImageUrlString"
-    var adImageUrlString: String? {
-        get {
-            return ud.string(forKey: kAdImageUrlString)
-        } set {
-            ud.set(newValue, forKey: kAdImageUrlString)
-            ud.synchronize()
-        }
-    }
-    
-    // MARK: - Ad Click URL
-    private let kAdClickUrlString = "Settings_adClickUrlString"
-    var adClickUrlString: String? {
-        get {
-            return ud.string(forKey: kAdClickUrlString)
-        } set {
-            ud.set(newValue, forKey: kAdClickUrlString)
-            ud.synchronize()
-        }
-    }
-    
     // MARK: - App Version
     private let kAppMajorVersion = "Settings_appMajorVersion"
     var appMajorVersion: Int {

@@ -26,6 +26,14 @@ class AdView: UIButton {
         }
     }
     
+    private var ad: Ad? {
+        didSet {
+            if let ad = ad {
+                apply(adImageUrlString: ad.imageUrlString)
+            }
+        }
+    }
+    
     public func load() {
         // Hide ad if premium purchased
         if Test.of(kind: Test.premiumKinds.first!).purchased {
@@ -33,39 +41,17 @@ class AdView: UIButton {
             return
         }
         
-        // Load from cache if exists
-        var loader: Loader?
-        var oldAdImageUrlString: String?
-        if let adImageUrlString = Settings.shared.adImageUrlString {
-            loader = apply(adImageUrlString: adImageUrlString)
-            oldAdImageUrlString = adImageUrlString
-        }
-        
-        // Ask for actual URL
-        Api.shared.receiveAd {
-            if let adImageUrlString = Settings.shared.adImageUrlString {
-                if let loader = loader,
-                    oldAdImageUrlString != adImageUrlString &&
-                    loader.state != .completed {
-                    
-                    // URL changed, cancel loader
-                    loader.cancel()
-                } else {
-                    // 1. No cached ad
-                    // 2. Same URL
-                    // 3. Cached ad even with another URL already loaded, check it
-                    if oldAdImageUrlString == nil || oldAdImageUrlString != adImageUrlString {
-                        _ = self.apply(adImageUrlString: adImageUrlString)
-                    }
-                }
-            } else {
-                self.hide()
-            }
+        let ads = Ad.cachedList()
+        if ads.count > 0 {
+            ad = ads[Int(arc4random_uniform(UInt32(ads.count)))]
+        } else {
+            // if no ads yet in cache, either there are no from API, 
+            // or first call is queued, which will also call this method
         }
     }
     
-    private func apply(adImageUrlString: String) -> Loader {
-        return ImageLoader.request(with: adImageUrlString, onCompletion: {
+    private func apply(adImageUrlString: String) {
+        ImageLoader.request(with: adImageUrlString, onCompletion: {
             if let image = $0.0 {
                 OperationQueue.main.addOperation {
                     self.setImage(image, for: .normal)
@@ -79,8 +65,8 @@ class AdView: UIButton {
     }
     
     @objc private func clicked() {
-        if let adClickUrlString = Settings.shared.adClickUrlString {
-            UIApplication.shared.openURL(URL(string: adClickUrlString)!)
+        if let ad = ad {
+            UIApplication.shared.openURL(URL(string: ad.clickUrlString)!)
         }
     }
 }

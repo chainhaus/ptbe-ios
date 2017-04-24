@@ -28,7 +28,7 @@ class MainVC: UIViewController {
                 
         // Check whether we need to update local database
         let hasNoCachedAdsOnLaunch = Ad.cachedList().count == 0
-        
+        print("Question.cachedList() = \(Question.cachedList().count)")
         if Settings.shared.versionShouldUpdate || Question.cachedList().count == 0 {
             Api.shared.receiveVersion(callback: { versionChanged in
                 if versionChanged {

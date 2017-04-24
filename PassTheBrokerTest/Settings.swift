@@ -59,6 +59,9 @@ class Settings {
     var versionShouldUpdate: Bool {
         get {
             if ud.object(forKey: kVersionLastChecked) == nil {
+                ud.set(Date().timeIntervalSince1970, forKey: kVersionLastChecked)
+                ud.synchronize()
+                
                 return true
             }
             

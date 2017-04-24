@@ -19,6 +19,15 @@ class Api {
     private let kBaseUrlString = "http://52.206.94.249:5000/api/1/"
     
     // MARK: - Default Call
+    private lazy var manager: SessionManager = {
+        let serverTrustPolicies: [String: ServerTrustPolicy] = ["52.206.94.249": .disableEvaluation]
+        
+        return SessionManager(
+            configuration: URLSessionConfiguration.default,
+            serverTrustPolicyManager: ServerTrustPolicyManager(policies: serverTrustPolicies)
+        )
+    }()
+    
     fileprivate func request(_ path: String,
                              method: HTTPMethod,
                              body: Parameters?,
@@ -38,14 +47,18 @@ class Api {
         print("HTTP Headers for request: \(headers)")
         print("Request params: \(body ?? [:])")
         
-        Alamofire.request(urlString, method: method, parameters: body, headers: headers)
+        manager.request(urlString, method: method, parameters: body, headers: headers)
+            .responseString {
+                print("Response: \($0.result.value)")
+            }
             .validate()
             .responseJSON {
                 switch $0.result {
                 case .success(let value):
                     print("Received response for '\(urlString)': \(value)")
                     callback(value)
-                case .failure:
+                case .failure(let error):
+                    print("Request for '\(urlString)' resulted in error: '\(error.localizedDescription)'")
                     callback(nil)
                 }
         }
@@ -211,7 +224,7 @@ extension Api {
     
     public func receiveAd(callback: @escaping () -> Void) {
         request("getAd", method: .get, body: nil) {
-            if let response = $0 as? [String : Any] {
+            if let response = $0 as? [[String : Any]] {
                 let realm = try! Realm()
                 
                 // delete cached
@@ -220,9 +233,10 @@ extension Api {
                 // clear, and add from response
                 var ads: [Ad] = []
                 
-                // TODO: currently, only current Ad
-                if let ad = Ad.from(jsonObject: response) {
-                    ads.append(ad)
+                for jsonObject in response {
+                    if let ad = Ad.from(jsonObject: jsonObject) {
+                        ads.append(ad)
+                    }
                 }
                 
                 // save to database

@@ -96,13 +96,16 @@ class TestVC: UIViewController {
                 }
             } else {
                 MBProgressHUD.hide(for: self.view, animated: true)
+                
                 UIAlertController.show(in: self,
                                        withTitle: "Warning",
                                        message: "Failed to submit your test result.\nDo you want to retry? Otherwise, your result will be lost.",
                                        actions: [
-                                        UIAlertAction(title: "Retry", style: .default, handler: nil),
-                                        UIAlertAction(title: "Continue", style: .destructive, handler: { _ in
+                                        UIAlertAction(title: "Retry", style: .default, handler: { _ in
                                             self.finish()
+                                        }),
+                                        UIAlertAction(title: "Continue", style: .destructive, handler: { _ in
+                                            self.openResult()
                                         })])
             }
         }

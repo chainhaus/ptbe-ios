@@ -201,7 +201,7 @@ class MainVC: UIViewController {
                 case .paymentNotAllowed: errorString = "Payment not allowed"
                 }
                 
-                UIAlertController.show(okAlertIn: self, withTitle: "Warning", message: "Payment failed. Reason:\n\"\(errorString)\"")
+                UIAlertController.show(okAlertIn: self, withTitle: "Warning", message: "Payment failed. Reason:\n\"\(errorString!)\"")
             }
         }
     }

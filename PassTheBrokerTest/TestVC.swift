@@ -32,6 +32,7 @@ class TestVC: UIViewController {
     
     @IBOutlet weak var testTitleLabel: UILabel!
     @IBOutlet weak var questionHeaderLabel: UILabel!
+    @IBOutlet weak var topicNameLabel: UILabel!
     @IBOutlet weak var questionLabel: UILabel!
     @IBOutlet weak var choice1Button: UIButton!
     @IBOutlet weak var choice2Button: UIButton!
@@ -69,6 +70,7 @@ class TestVC: UIViewController {
         questionHeaderLabel.text = "Question \(questionIndex+1)/\(test.questionsCount)"
         
         let question = test.questions[questionIndex]
+        topicNameLabel.text = question.topic.name
         questionLabel.text = question.question
         choice1Button.setTitle(question.choice1, for: .normal)
         choice2Button.setTitle(question.choice2, for: .normal)

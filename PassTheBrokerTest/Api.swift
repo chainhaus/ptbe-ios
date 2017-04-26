@@ -16,11 +16,11 @@ class Api {
     // MARK: - Static
     
     public static let shared = Api()
-    private let kBaseUrlString = "http://52.206.94.249:5000/api/1/"
+    private let kBaseUrlString = "https://api.passthebrokerexam.com/api/1/"
     
     // MARK: - Default Call
     private lazy var manager: SessionManager = {
-        let serverTrustPolicies: [String: ServerTrustPolicy] = ["52.206.94.249": .disableEvaluation]
+        let serverTrustPolicies: [String: ServerTrustPolicy] = ["api.passthebrokerexam.com": .disableEvaluation]
         
         return SessionManager(
             configuration: URLSessionConfiguration.default,
@@ -36,6 +36,7 @@ class Api {
         let urlString = kBaseUrlString.appending(path)
         
         var headers: HTTPHeaders = ["API_KEY": "abc123",
+                                    "APP_ID" : "1",
                                     "CONTENT-TYPE": "application/x-www-form-urlencoded",
                                     "CACHE-CONTROL": "no-cache"]
         

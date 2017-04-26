@@ -42,8 +42,14 @@ class SettingsVC: UIViewController {
                                       message: "",
                                       preferredStyle: .alert)
         
-        alert.addTextField { $0.placeholder = "New password" }
-        alert.addTextField { $0.placeholder = "Confirm password" }
+        alert.addTextField {
+            $0.placeholder = "New password"
+            $0.isSecureTextEntry = true
+        }
+        alert.addTextField {
+            $0.placeholder = "Confirm password"
+            $0.isSecureTextEntry = true
+        }
         
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
         alert.addAction(UIAlertAction(title: "Change", style: .default, handler: { _ in

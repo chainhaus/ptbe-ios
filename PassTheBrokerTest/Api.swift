@@ -49,9 +49,6 @@ class Api {
         print("Request params: \(body ?? [:])")
         
         manager.request(urlString, method: method, parameters: body, headers: headers)
-            .responseString {
-                print("Response: \($0.result.value)")
-            }
             .validate()
             .responseJSON {
                 switch $0.result {
@@ -423,13 +420,13 @@ extension Api {
         }
     }
     
-    public func receiveTestHistory(_ callback: @escaping (_ testResults: [TestResult]?, _ errorString: String?) -> Void) {
+    public func receiveTestHistory(callback: ((_ testResults: [TestResult]?, _ errorString: String?) -> Void)?) {
         request("getTestHistory", method: .get, body: nil) {
             if let response = $0 as? [[String : Any]] {                
                 let realm = try! Realm()
                 
                 // delete cached
-                var testResultsToDelete = TestResult.cachedList()
+                let testResultsToDelete = TestResult.cachedList()
                 
                 // clear, and add from response
                 var testResults: [TestResult] = []
@@ -439,7 +436,9 @@ extension Api {
                     }
                 }
                 
-                callback(testResults, nil)
+                if let callback = callback {
+                    callback(testResults, nil)
+                }
                 
                 // save to database
                 try! realm.write {
@@ -451,8 +450,10 @@ extension Api {
                 }
             } else {
                 print("Invalid response")
-                callback(nil,
-                         "Couldn't load test history. Please check your internet connection and try again later.")
+                if let callback = callback {
+                    callback(nil,
+                             "Couldn't load test history. Please check your internet connection and try again later.")
+                }
             }
         }
     }

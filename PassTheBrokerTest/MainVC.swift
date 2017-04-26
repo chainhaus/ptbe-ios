@@ -23,34 +23,47 @@ class MainVC: UIViewController {
     
     // MARK: - Methods
     
+    private func updateVersion() {
+        Api.shared.receiveVersion(callback: { versionChanged in
+            if versionChanged {
+                self.loadQuestions(callback: nil)
+            }
+        })
+    }
+    
+    private func updateAds() {
+        let hasNoCachedAdsOnLaunch = Ad.cachedList().count == 0
+        
+        // Ask for ads only if premium isn't yet activated
+        if !Test.of(kind: Test.premiumKinds.first!).purchased {
+            Api.shared.receiveAd {
+                if hasNoCachedAdsOnLaunch {
+                    // force first launch ads
+                    self.adView.load()
+                }
+            }
+        }
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-                
+        
         // Check whether we need to update local database
-        let hasNoCachedAdsOnLaunch = Ad.cachedList().count == 0
-        print("Question.cachedList() = \(Question.cachedList().count)")
-        if Settings.shared.versionShouldUpdate || Question.cachedList().count == 0 {
-            Api.shared.receiveVersion(callback: { versionChanged in
-                if versionChanged {
-                    self.loadQuestions(callback: nil)
-                }
-            })
+        if Settings.shared.versionShouldUpdate {
+            updateVersion()
+            updateAds()
+        } else {
+            if Question.cachedList().count == 0 {
+                updateVersion()
+            }
             
-            // Ask for ads only if premium isn't yet activated
-            if !Test.of(kind: Test.premiumKinds.first!).purchased {
-                Api.shared.receiveAd {
-                    if hasNoCachedAdsOnLaunch {
-                        // force first launch ads
-                        self.adView.load()
-                    }
-                }
+            if Ad.cachedList().count == 0 {
+                updateAds()
             }
         }
         
         // Get most recent test history
-        Api.shared.receiveTestHistory { _ in
-            // do nothing
-        }
+        Api.shared.receiveTestHistory(callback: nil)
         
         // Sign for log out action
         Event.shared.onLogout { [weak self] in // cast weak to avoid memory leak

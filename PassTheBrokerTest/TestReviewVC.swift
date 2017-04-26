@@ -42,7 +42,7 @@ extension TestReviewVC: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
-        return indexPath.row == 0 ? 36 : 112
+        return indexPath.row == 0 ? 36 : 132
     }
 }
 

@@ -10,6 +10,7 @@ class TestReviewQuestionTVC: UITableViewCell {
     
     // MARK: - IBOutlet
     
+    @IBOutlet weak var topicNameLabel: UILabel!
     @IBOutlet weak var questionLabel: UILabel!
     @IBOutlet weak var chosenAnswerLabel: UILabel!
     @IBOutlet weak var correctAnswerLabel: UILabel!
@@ -17,6 +18,7 @@ class TestReviewQuestionTVC: UITableViewCell {
     // MARK: - Question
     
     public func setQuestion(_ question: Question, test: Test) {
+        topicNameLabel.text = question.topic.name
         questionLabel.text = question.question
         
         if let chosenAnswer = question.value(forKeyPath: "choice\(test.answer(for: question) + 1)") as? String {

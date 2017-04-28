@@ -109,10 +109,9 @@ class Test: Object {
                 }
             }
             
-            let cachedList = Question.cachedList()
             var questionsFound = 0
             
-            for question in cachedList {
+            for question in Question.cachedList() {
                 if availableTopics.contains(question.topic) {
                     questionsFound += 1
                 }
@@ -136,10 +135,8 @@ class Test: Object {
             }
         }
         
-        let cachedList = Question.cachedList()
-        
         var questionsForAvailableTopics: [Question] = []
-        for question in cachedList {
+        for question in Question.cachedList() {
             if availableTopics.contains(question.topic) {
                 questionsForAvailableTopics.append(question)
             }

@@ -12,7 +12,7 @@ class Ad: Object {
     
     // MARK: - Entity declaration
     
-    dynamic var id = ""
+    dynamic var id = 0
     dynamic var imageUrlString = ""
     dynamic var clickUrlString = ""
     
@@ -33,7 +33,7 @@ class Ad: Object {
     
     public static func from(jsonObject: [String: Any]) -> Ad? {
         guard
-//            let id = jsonObject["id"] as? Int,
+            let id = jsonObject["id"] as? Int,
             let imageUrlString = jsonObject["adImageURL"] as? String,
             let clickUrlString = jsonObject["adClickURL"] as? String
             
@@ -42,8 +42,7 @@ class Ad: Object {
         }
         
         let ad = Ad()
-        ad.id = UUID().uuidString
-//        ad.id = id
+        ad.id = id
         ad.imageUrlString = imageUrlString
         ad.clickUrlString = clickUrlString
         

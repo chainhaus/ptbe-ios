@@ -109,7 +109,7 @@
                                         <rect key="frame" x="0.0" y="0.0" width="320" height="59"/>
                                         <fontDescription key="fontDescription" name=".AppleSystemUIFont" family=".AppleSystemUIFont" pointSize="13"/>
                                         <state key="normal" title="Forgot password?">
-                                            <color key="titleColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                            <color key="titleColor" red="0.72156862745098038" green="0.72156862745098038" blue="0.72156862745098038" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                         </state>
                                         <connections>
                                             <action selector="restorePassword" destination="BYZ-38-t0r" eventType="touchUpInside" id="9V0-kj-uDX"/>

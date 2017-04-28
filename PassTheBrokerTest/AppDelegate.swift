@@ -35,8 +35,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       
         // Make Realm encrypt all data
         autoreleasepool {
-            let configuration = Realm.Configuration(encryptionKey: getKey() as Data, migrationBlock: { _ in
+            let configuration = Realm.Configuration(
+                encryptionKey: getKey() as Data,
+                schemaVersion: 1,
+                migrationBlock: { migration, oldSchemaVersion in
+                    
+                    if oldSchemaVersion < 1 {
+                        // changed ID from string (UUID) to Int from server
+                        var adId = 1
+                        migration.enumerateObjects(ofType: Ad.className(), { old, new in
+                            new?["id"] = adId
+                            adId += 1
+                        })
+                    }
             })
+            
             do {
                 _ = try Realm(configuration: configuration)
                 Realm.Configuration.defaultConfiguration = configuration

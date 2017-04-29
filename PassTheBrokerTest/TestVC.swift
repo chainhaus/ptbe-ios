@@ -87,7 +87,9 @@ class TestVC: UIViewController {
     
     func finish() {
         if !Settings.shared.loggedIn {
+            TestResult.make(from: test)
             openResult()
+            
             return
         }
         

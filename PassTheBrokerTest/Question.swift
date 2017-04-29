@@ -45,7 +45,7 @@ class Question: Object {
     
     static func cachedList() -> [Question] {
         let realm = try! Realm()
-        return realm.objects(Question.self).map { $0 }
+        return cachedList(realm: realm)
     }
     
     public static func from(jsonObject: [String: Any]) -> Question? {

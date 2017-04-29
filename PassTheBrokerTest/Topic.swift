@@ -30,7 +30,7 @@ class Topic: Object {
     
     static func cachedList() -> [Topic] {
         let realm = try! Realm()
-        return realm.objects(Topic.self).map { $0 }
+        return cachedList(realm: realm)
     }
     
     public static func from(jsonObject: [String: Any], states: [Int: Bool]) -> Topic? {

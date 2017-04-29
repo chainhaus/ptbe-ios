@@ -28,7 +28,7 @@ class Ad: Object {
     
     static func cachedList() -> [Ad] {
         let realm = try! Realm()
-        return realm.objects(Ad.self).map { $0 }
+        return cachedList(realm: realm)
     }
     
     public static func from(jsonObject: [String: Any]) -> Ad? {

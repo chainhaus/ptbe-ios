@@ -1434,8 +1434,8 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="5y0-Gr-kqh" userLabel="Bottom Separator">
-                                <rect key="frame" x="2" y="516" width="318" height="2"/>
-                                <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                <rect key="frame" x="2" y="516" width="316" height="2"/>
+                                <color key="backgroundColor" red="0.72156862745098038" green="0.72156862745098038" blue="0.72156862745098038" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="2" id="vux-Z1-pgO"/>
                                 </constraints>
@@ -1531,7 +1531,7 @@
                             <constraint firstItem="FOK-FY-X8h" firstAttribute="top" secondItem="5y0-Gr-kqh" secondAttribute="bottom" id="0Hg-L1-cNA"/>
                             <constraint firstItem="cwF-nr-XHo" firstAttribute="top" secondItem="FOK-FY-X8h" secondAttribute="bottom" id="27a-tl-T7O"/>
                             <constraint firstItem="RfF-Lb-SNb" firstAttribute="centerX" secondItem="izc-XX-xyt" secondAttribute="centerX" id="5aS-RE-Odb"/>
-                            <constraint firstAttribute="trailing" secondItem="5y0-Gr-kqh" secondAttribute="trailing" id="5qz-cK-xQM"/>
+                            <constraint firstAttribute="trailing" secondItem="5y0-Gr-kqh" secondAttribute="trailing" constant="2" id="5qz-cK-xQM"/>
                             <constraint firstAttribute="trailing" secondItem="s6k-Yf-CCw" secondAttribute="trailing" constant="53" id="66u-4E-Xdy"/>
                             <constraint firstItem="o7d-fh-6bD" firstAttribute="top" secondItem="s6k-Yf-CCw" secondAttribute="bottom" id="92o-iP-nS2"/>
                             <constraint firstItem="RfF-Lb-SNb" firstAttribute="width" secondItem="izc-XX-xyt" secondAttribute="width" id="ASH-Bv-Pjy"/>

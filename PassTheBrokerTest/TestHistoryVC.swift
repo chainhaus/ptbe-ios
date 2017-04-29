@@ -46,12 +46,14 @@ class TestHistoryVC: UIViewController {
         // Load from cache
         testResults = TestResult.cachedList()
         
-        MBProgressHUD.showAdded(to: view, animated: true)
-        Api.shared.receiveTestHistory {
-            MBProgressHUD.hide(for: self.view, animated: true)
-            
-            if let testResults = $0.0 {
-                self.testResults = testResults
+        if Settings.shared.loggedIn {
+            MBProgressHUD.showAdded(to: view, animated: true)
+            Api.shared.receiveTestHistory {
+                MBProgressHUD.hide(for: self.view, animated: true)
+                
+                if let testResults = $0.0 {
+                    self.testResults = testResults
+                }
             }
         }
     }

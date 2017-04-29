@@ -12,10 +12,11 @@ class TestResult: Object {
     
     // MARK: - Entity declaration
     
-    dynamic var id = 0
+    dynamic var id = ""
     dynamic var testName = ""
     dynamic var dateRaw = 0.0
     dynamic var score = 0.0
+    dynamic var email: String? = nil
     
     override static func primaryKey() -> String? {
         return "id"
@@ -32,12 +33,14 @@ class TestResult: Object {
     // MARK: - Caching/Serialization
     
     static func cachedList(realm: Realm) -> [TestResult] {
-        return realm.objects(TestResult.self).map { $0 }
+        return realm.objects(TestResult.self)
+            .map { $0 }
+            .filter { $0.email == Settings.shared.userEmail }
     }
     
     static func cachedList() -> [TestResult] {
         let realm = try! Realm()
-        return realm.objects(TestResult.self).map { $0 }
+        return cachedList(realm: realm)
     }
     
     private static let dateFormatter: DateFormatter = {
@@ -60,12 +63,30 @@ class TestResult: Object {
                 return nil
         }
         
+        let email = Settings.shared.userEmail!
+        
         let testResult = TestResult()
-        testResult.id = id
+        testResult.id = email.appending("_").appending(String(id))
         testResult.dateRaw = date
         testResult.score = score * 100
         testResult.testName = testName
+        testResult.email = email
         
         return testResult
+    }
+    
+    public static func make(from test: Test) {
+        let realm = try! Realm()
+        
+        let testResult = TestResult()
+        testResult.id = UUID().uuidString
+        testResult.dateRaw = Date().timeIntervalSince1970
+        testResult.score = test.score
+        testResult.testName = test.kind.textRepresentation()
+        testResult.email = nil
+        
+        try! realm.write {
+            realm.add(testResult)
+        }
     }
 }

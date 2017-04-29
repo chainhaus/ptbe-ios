@@ -11,6 +11,12 @@ class Settings {
     public static let shared = Settings()
     private let ud = UserDefaults.standard
     
+    var loggedIn: Bool {
+        get {
+            return sessionKey != nil && userEmail != nil
+        }
+    }
+    
     // MARK: - Session Key
     private let kSessionKey = "Settings_sessionKey"
     var sessionKey: String? {

@@ -24,11 +24,16 @@ class SettingsVC: UIViewController {
     // MARK: - IBOutlet
     
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var logoutButtonheight: NSLayoutConstraint!
     
     // MARK: - Methods
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        if !Settings.shared.loggedIn {
+            logoutButtonheight.constant = 0
+        }
     }
     
     func failedToSendPasswordChange(dueTo reason: String) {
@@ -93,19 +98,18 @@ class SettingsVC: UIViewController {
     }
     
     func submitPurchase() {
+        if !Settings.shared.loggedIn {
+            paymentSuccessful()
+            return
+        }
+        
         MBProgressHUD.showAdded(to: view, animated: true)
         
         Api.shared.submitPurchase(callback: {
             MBProgressHUD.hide(for: self.view, animated: true)
             
             if $0 {
-                UIAlertController.show(okAlertIn: self,
-                                       withTitle: "Congratulations",
-                                       message: "Your premium access was successfully restored.",
-                                       callback: {
-                                        // Tests will be updated, and questions will be loaded
-                                        Event.shared.purchased()
-                })
+                self.paymentSuccessful()
             } else {
                 UIAlertController.show(in: self,
                                        withTitle: "Warning",
@@ -117,6 +121,16 @@ class SettingsVC: UIViewController {
                                         })
                     ])
             }
+        })
+    }
+    
+    func paymentSuccessful() {
+        UIAlertController.show(okAlertIn: self,
+                               withTitle: "Congratulations",
+                               message: "Your premium access was successfully restored.",
+                               callback: {
+                                // Tests will be updated, and questions will be loaded
+                                Event.shared.purchased()
         })
     }
     
@@ -166,10 +180,12 @@ class SettingsVC: UIViewController {
 extension SettingsVC: UITableViewDelegate {
     
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if indexPath.row == 0 {
-            changePassword()
-        } else {
+        let restoreIndex = Settings.shared.loggedIn ? 1 : 0
+        
+        if indexPath.row == restoreIndex {
             restorePurchase()
+        } else {
+            changePassword()
         }
     }
 }
@@ -183,15 +199,17 @@ extension SettingsVC: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return titles.count
+        return titles.count - (Settings.shared.loggedIn ? 0 : 1)
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let offset = Settings.shared.loggedIn ? 0 : 1
+        
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell",
                                                  for: indexPath) as! SettingsTVC
-        cell.titleLabel.text        = titles[indexPath.row]
-        cell.subtitleLabel.text     = subtitles[indexPath.row]
-        cell.iconImageView.image    = UIImage.init(named: icons[indexPath.row])
+        cell.titleLabel.text        = titles[indexPath.row + offset]
+        cell.subtitleLabel.text     = subtitles[indexPath.row + offset]
+        cell.iconImageView.image    = UIImage.init(named: icons[indexPath.row + offset])
         
         return cell
     }

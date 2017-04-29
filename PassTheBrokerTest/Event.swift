@@ -40,6 +40,58 @@ class Event {
         nc.post(name: kPurchase, object: nil)
     }
     
+    // MARK: - Registered
+    private let kRegistered = NSNotification.Name(rawValue: "Event_Registered")
+    
+    public func onRegistered(execute block: @escaping () -> Void) {
+        nc.addObserver(forName: kRegistered, object: nil, queue: OperationQueue.main) { _ in
+            block()
+        }
+    }
+    
+    public func registered() {
+        nc.post(name: kRegistered, object: nil)
+    }
+    
+    // MARK: - Close Registration
+    private let kCloseRegistration = NSNotification.Name(rawValue: "Event_CloseRegistration")
+    
+    public func onCloseRegistration(execute block: @escaping () -> Void) {
+        nc.addObserver(forName: kCloseRegistration, object: nil, queue: OperationQueue.main) { _ in
+            block()
+        }
+    }
+    
+    public func closeRegistration() {
+        nc.post(name: kCloseRegistration, object: nil)
+    }
+    
+    // MARK: - Open LoginVC
+    private let kOpenLogin = NSNotification.Name(rawValue: "Event_OpenLogin")
+    
+    public func onOpenLogin(execute block: @escaping () -> Void) {
+        nc.addObserver(forName: kOpenLogin, object: nil, queue: OperationQueue.main) { _ in
+            block()
+        }
+    }
+    
+    public func openLogin() {
+        nc.post(name: kOpenLogin, object: nil)
+    }
+    
+    // MARK: - Open RegisterVC
+    private let kOpenRegister = NSNotification.Name(rawValue: "Event_OpenRegister")
+    
+    public func onOpenRegister(execute block: @escaping () -> Void) {
+        nc.addObserver(forName: kOpenRegister, object: nil, queue: OperationQueue.main) { _ in
+            block()
+        }
+    }
+    
+    public func openRegister() {
+        nc.post(name: kOpenRegister, object: nil)
+    }
+    
     // MARK: - Open MainVC
     private let kOpenMain = NSNotification.Name(rawValue: "Event_OpenMain")
     

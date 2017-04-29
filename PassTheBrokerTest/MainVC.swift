@@ -62,13 +62,35 @@ class MainVC: UIViewController {
             }
         }
         
-        // Get most recent test history
-        Api.shared.receiveTestHistory(callback: nil)
+        if Settings.shared.loggedIn {
+            // Get most recent test history
+            Api.shared.receiveTestHistory(callback: nil)
+        }
         
         // Sign for log out action
-        Event.shared.onLogout { [weak self] in // cast weak to avoid memory leak
+        Event.shared.onLogout {
+            Event.shared.openMain()
+        }
+        
+        // Sign for open loginVC
+        Event.shared.onOpenLogin { [weak self] in // cast weak to avoid memory leak
             if let `self` = self {
-                self.navigationController?.popToRootViewController(animated: true)
+                let vc = self.storyboard?.instantiateViewController(withIdentifier: "LoginVC") as! LoginVC
+                vc.skipToRegister = false
+                
+                self.navigationController?.popToViewController(self, animated: false)
+                self.navigationController?.pushViewController(vc, animated: false)
+            }
+        }
+        
+        // Sign for open registerVC
+        Event.shared.onOpenRegister { [weak self] in // cast weak to avoid memory leak
+            if let `self` = self {
+                let vc = self.storyboard?.instantiateViewController(withIdentifier: "LoginVC") as! LoginVC
+                vc.skipToRegister = true
+                
+                self.navigationController?.popToViewController(self, animated: false)
+                self.navigationController?.pushViewController(vc, animated: false)
             }
         }
         
@@ -161,21 +183,18 @@ class MainVC: UIViewController {
     // MARK: - Action Methods
     
     func submitPurchase(testButton: TestButton, kind: Test.Kind) {
+        if !Settings.shared.loggedIn {
+            paymentSuccessful(testButton: testButton, kind: kind)
+            return
+        }
+        
         MBProgressHUD.showAdded(to: view, animated: true)
         
         Api.shared.submitPurchase(callback: {
             MBProgressHUD.hide(for: self.view, animated: true)
             
             if $0 {
-                UIAlertController.show(okAlertIn: self,
-                                       withTitle: "Congratulations",
-                                       message: "Payment has been placed successfully. Now, you will be redirected to the test.",
-                                       callback: {
-                                        // Tests will be updated, and questions will be loaded
-                                        Event.shared.purchased()
-                                        // Also, all questions must be deleted, and await full list download
-                                        self.openTest(testButton: testButton, kind: kind)
-                })
+                self.paymentSuccessful(testButton: testButton, kind: kind)
             } else {
                 UIAlertController.show(in: self,
                                        withTitle: "Warning",
@@ -187,6 +206,18 @@ class MainVC: UIViewController {
                                         })
                     ])
             }
+        })
+    }
+    
+    func paymentSuccessful(testButton: TestButton, kind: Test.Kind) {
+        UIAlertController.show(okAlertIn: self,
+                               withTitle: "Congratulations",
+                               message: "Payment has been placed successfully. Now, you will be redirected to the test.",
+                               callback: {
+                                // Tests will be updated, and questions will be loaded
+                                Event.shared.purchased()
+                                // Also, all questions must be deleted, and await full list download
+                                self.openTest(testButton: testButton, kind: kind)
         })
     }
     

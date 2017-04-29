@@ -10,6 +10,8 @@ import MBProgressHUD
 
 class RegisterVC: UIViewController {
     
+    var openedFromLogin = false
+    
     // MARK: - IBOutlet
     
     @IBOutlet weak var firstNameTextField: VMFloatLabelTextField!
@@ -18,7 +20,8 @@ class RegisterVC: UIViewController {
     @IBOutlet weak var passwordTextField: VMFloatLabelTextField!
     @IBOutlet weak var confirmPasswordTextField: VMFloatLabelTextField!
     
-    @IBOutlet weak var btnSignUp: UIButton!
+    @IBOutlet weak var menuButton: UIButton!
+    @IBOutlet weak var backButton: UIButton!
     
     // MARK: - Methods
     
@@ -32,6 +35,9 @@ class RegisterVC: UIViewController {
                                 lastNameTextField] {
             tf.showBottomBorder()
         }
+        
+        menuButton.isHidden = !openedFromLogin
+        backButton.isHidden = openedFromLogin
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -88,14 +94,20 @@ class RegisterVC: UIViewController {
                                        withTitle: "Congratulations",
                                        message: "Signed up successfully",
                                        callback: {
-                                        self.navigationController?.popViewController(animated: true)
+                                        Event.shared.registered()
                 })
             }
         }
     }
     
+    @IBAction func openMenu() {
+        if let vc = storyboard?.instantiateViewController(withIdentifier: "MenuVC") {
+            present(vc, animated: true, completion: nil)
+        }
+    }
+    
     @IBAction func back() {
-        navigationController?.popViewController(animated: true)
+        Event.shared.closeRegistration()
     }
 }
 

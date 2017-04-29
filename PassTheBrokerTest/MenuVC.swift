@@ -11,19 +11,41 @@ class MenuVC: UIViewController {
     
     // MARK: - IBOutlet
     
+    @IBOutlet weak var primaryButtonsLoggedInWrapper: UIView!
+    @IBOutlet weak var primaryButtonsLoggedOutWrapper: UIView!
     @IBOutlet weak var versionLabel: UILabel!
+    @IBOutlet weak var bottomButtonsLoggedInWrapper: UIView!
+    @IBOutlet weak var bottomButtonsLoggedOutWrapper: UIView!
     
     // MARK: - Methods
     
     override func viewDidLoad() {
         super.viewDidLoad()
         versionLabel.text = "DB v\(Settings.shared.appMajorVersion).\(Settings.shared.appMinorVersion)"
+        
+        let loggedIn = Settings.shared.loggedIn
+        primaryButtonsLoggedInWrapper.isHidden =    !loggedIn
+        primaryButtonsLoggedOutWrapper.isHidden =   loggedIn
+        bottomButtonsLoggedInWrapper.isHidden =     !loggedIn
+        bottomButtonsLoggedOutWrapper.isHidden =    loggedIn
     }
     
     // MARK: - Action Methods
     
     @IBAction func close() {
         dismiss(animated: true, completion: nil)
+    }
+    
+    @IBAction func openLogin() {
+        dismiss(animated: false) {
+            Event.shared.openLogin()
+        }
+    }
+    
+    @IBAction func openRegister() {
+        dismiss(animated: false) {
+            Event.shared.openRegister()
+        }
     }
     
     @IBAction func takeATest() {

@@ -9,6 +9,8 @@ import MBProgressHUD
 
 class LoginVC: UIViewController {
     
+    var skipToRegister = false
+    
     // MARK: - IBOutlet
     
     @IBOutlet weak var emailTextField: VMFloatLabelTextField!
@@ -25,14 +27,30 @@ class LoginVC: UIViewController {
                                     tf.showBottomBorder()
         }
         
-        if Settings.shared.userEmail != nil && Settings.shared.sessionKey != nil {
-            proceedToApp(animated: false)
+        if skipToRegister {
+            if let vc = storyboard?.instantiateViewController(withIdentifier: "RegisterVC") as? RegisterVC {
+                vc.openedFromLogin = true
+                navigationController?.pushViewController(vc, animated: true)
+            }
         }
-    }
-    
-    func proceedToApp(animated: Bool) {
-        if let vc = self.storyboard?.instantiateViewController(withIdentifier: "MainVC") {
-            self.navigationController?.pushViewController(vc, animated: animated)
+        
+        Event.shared.onCloseRegistration { [weak self] in // cast weak to avoid memory leak
+            if let `self` = self {
+                print("onCloseRegistration skipToRegister = \(self.skipToRegister)")
+                if self.skipToRegister {
+                    Event.shared.openMain()
+                } else {
+                    // pop to self
+                    self.navigationController?.popViewController(animated: true)
+                }
+            }
+        }
+        
+        Event.shared.onRegistered { [weak self] in // cast weak to avoid memory leak
+            if let `self` = self {
+                // pop to self
+                self.navigationController?.popViewController(animated: true)
+            }
         }
     }
     
@@ -85,14 +103,24 @@ class LoginVC: UIViewController {
                 UIAlertController.show(okAlertIn: self, withTitle: "Warning", message: errorString)
             } else {
                 // logged in
-                self.proceedToApp(animated: true)
+                
+                // Get most recent test history
+                Api.shared.receiveTestHistory(callback: nil)
+                
+                Event.shared.openMain()
             }
         }
     }
     
+    @IBAction func openMenu() {
+        if let vc = storyboard?.instantiateViewController(withIdentifier: "MenuVC") {
+            present(vc, animated: true, completion: nil)
+        }
+    }
+    
     @IBAction func register() {
-        if let rvc = storyboard?.instantiateViewController(withIdentifier: "RegisterVC") {
-            navigationController?.pushViewController(rvc, animated: true)
+        if let vc = storyboard?.instantiateViewController(withIdentifier: "RegisterVC") {
+            navigationController?.pushViewController(vc, animated: true)
         }
     }
     

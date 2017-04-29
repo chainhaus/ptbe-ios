@@ -44,6 +44,9 @@ class Api {
             let userEmail = Settings.shared.userEmail {
             headers["SESSION_KEY"] = sessionKey
             headers["EMAIL_KEY"] = userEmail
+        } else {
+            headers["SESSION_KEY"] = "NONE"
+            headers["EMAIL_KEY"] = "NONE"
         }
         print("HTTP Headers for request: \(headers)")
         print("Request params: \(body ?? [:])")
@@ -105,7 +108,7 @@ extension Api {
                 Settings.shared.sessionKey = sessionKey
                 Settings.shared.userEmail = email
                             
-                if Test.of(kind: Test.premiumKinds.first!).purchased != premiumUser {
+                if !premiumUser && Test.of(kind: Test.premiumKinds.first!).purchased != premiumUser {
                     // silently try to send purchase to API
                     self.submitPurchase(callback: nil)
                 }

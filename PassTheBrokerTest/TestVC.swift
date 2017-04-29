@@ -86,6 +86,11 @@ class TestVC: UIViewController {
     }
     
     func finish() {
+        if !Settings.shared.loggedIn {
+            openResult()
+            return
+        }
+        
         MBProgressHUD.showAdded(to: view, animated: true)
         
         Api.shared.submitResult(of: test) { submitted in

@@ -64,20 +64,26 @@ class Settings {
     private let kVersionLastChecked = "Settings_versionLastChecked"
     var versionShouldUpdate: Bool {
         get {
-            if ud.object(forKey: kVersionLastChecked) == nil {
-                ud.set(Date().timeIntervalSince1970, forKey: kVersionLastChecked)
-                ud.synchronize()
-                
+            let now = Date().timeIntervalSince1970
+            let save = {
+                self.ud.set(now, forKey: self.kVersionLastChecked)
+                self.ud.synchronize()
+            }
+            
+            if appMajorVersion == 0 {
+                save()
                 return true
             }
             
-            let now = Date().timeIntervalSince1970
+            if ud.object(forKey: kVersionLastChecked) == nil {
+                save()
+                return true
+            }
+            
             let versionLastChecked = ud.double(forKey: kVersionLastChecked)
             print("versionLastChecked: \(versionLastChecked), now = \(now)")
             if now - versionLastChecked > 86400.0 {
-                ud.set(now, forKey: kVersionLastChecked)
-                ud.synchronize()
-                
+                save()
                 return true
             }
             

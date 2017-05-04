@@ -19,6 +19,7 @@ class RegisterVC: UIViewController {
     @IBOutlet weak var emailTextField: VMFloatLabelTextField!
     @IBOutlet weak var passwordTextField: VMFloatLabelTextField!
     @IBOutlet weak var confirmPasswordTextField: VMFloatLabelTextField!
+    @IBOutlet weak var phoneTextField: VMFloatLabelTextField!
     
     @IBOutlet weak var menuButton: UIButton!
     @IBOutlet weak var backButton: UIButton!
@@ -53,7 +54,11 @@ class RegisterVC: UIViewController {
         
         var errorString: String?
         
-        if emailTextField.text == "" {
+        if firstNameTextField.text == "" {
+            errorString = "Please enter your first name"
+        } else if lastNameTextField.text == "" {
+            errorString = "Please enter your last name"
+        } else if emailTextField.text == "" {
             errorString = "Please enter your e-mail"
         } else if !match {
             errorString = "Please enter valid e-mail"
@@ -67,10 +72,6 @@ class RegisterVC: UIViewController {
             errorString = "Password should be minimum 6 digits long"
         } else if passwordTextField.text != confirmPasswordTextField.text {
             errorString = "Passwords do not match"
-        } else if firstNameTextField.text == "" {
-            errorString = "Please enter your first name"
-        } else if lastNameTextField.text == "" {
-            errorString = "Please enter your last name"
         }
         
         if let errorString = errorString {
@@ -82,7 +83,11 @@ class RegisterVC: UIViewController {
         
         MBProgressHUD.showAdded(to: view, animated: true)
         
-        Api.shared.register(email: emailTextField.text!, password: confirmPasswordTextField.text!, firstName: firstNameTextField.text!, lastName: lastNameTextField.text!) {
+        Api.shared.register(email: emailTextField.text!,
+                            password: confirmPasswordTextField.text!,
+                            firstName: firstNameTextField.text!,
+                            lastName: lastNameTextField.text!,
+                            phoneNumber: phoneTextField.text!) {
             MBProgressHUD.hide(for: self.view, animated: true)
             
             if let errorString = $1 {

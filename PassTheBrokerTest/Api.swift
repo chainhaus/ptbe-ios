@@ -122,6 +122,7 @@ extension Api {
                          password: String,
                          firstName: String,
                          lastName: String,
+                         phoneNumber: String,
                          callback: @escaping (_ registered: Bool, _ errorString: String?) -> Void) {
         
         let defaultErrorString = "Couldn't sign up"
@@ -131,7 +132,8 @@ extension Api {
                 body: ["email":     email,
                        "password":  password,
                        "fname":     firstName,
-                       "lname":     lastName]) {
+                       "lname":     lastName,
+                       "phoneNumber": phoneNumber]) {
                         
                         guard let response = $0 as? [String : Any] else {
                             // no response

@@ -48,6 +48,13 @@ class Question: Object {
         return cachedList(realm: realm)
     }
     
+    static func clearCache() {
+        let realm = try! Realm()
+        try! realm.write {
+            realm.delete(cachedList(realm: realm))
+        }
+    }
+    
     public static func from(jsonObject: [String: Any]) -> Question? {
         guard
             let id = jsonObject["id"] as? Int,

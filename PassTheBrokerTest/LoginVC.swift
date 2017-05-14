@@ -103,11 +103,7 @@ class LoginVC: UIViewController {
                 UIAlertController.show(okAlertIn: self, withTitle: "Warning", message: errorString)
             } else {
                 // logged in
-                
-                // Get most recent test history
-                Api.shared.receiveTestHistory(callback: nil)
-                
-                Event.shared.openMain()
+                Event.shared.login()
             }
         }
     }

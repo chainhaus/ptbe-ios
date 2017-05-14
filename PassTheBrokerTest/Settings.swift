@@ -60,7 +60,7 @@ class Settings {
         }
     }
     
-    // MARK: - Questions Last updated
+    // MARK: - Questions last updated
     private let kVersionLastChecked = "Settings_versionLastChecked"
     var versionShouldUpdate: Bool {
         get {

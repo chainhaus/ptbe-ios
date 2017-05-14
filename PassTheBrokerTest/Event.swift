@@ -27,6 +27,19 @@ class Event {
         nc.post(name: kLogout, object: nil)
     }
     
+    // MARK: - Logging in
+    private let kLogin = NSNotification.Name(rawValue: "Event_Login")
+    
+    public func onLogin(execute block: @escaping () -> Void) {
+        nc.addObserver(forName: kLogin, object: nil, queue: OperationQueue.main) { _ in
+            block()
+        }
+    }
+    
+    public func login() {
+        nc.post(name: kLogin, object: nil)
+    }
+    
     // MARK: - Purchase
     private let kPurchase = NSNotification.Name(rawValue: "Event_Purchase")
     

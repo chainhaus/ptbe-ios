@@ -45,6 +45,21 @@ class MainVC: UIViewController {
         }
     }
     
+    private func loggedInOrLoggedOut() {
+        Event.shared.openMain()
+        
+        // Force clearing questions
+        Question.clearCache()
+        
+        // Load no-auth questions
+        loadQuestions(callback: nil)
+        
+        if Settings.shared.loggedIn {
+            // Get most recent test history
+            Api.shared.receiveTestHistory(callback: nil)
+        }
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -67,10 +82,12 @@ class MainVC: UIViewController {
             Api.shared.receiveTestHistory(callback: nil)
         }
         
-        // Sign for log out action
-        Event.shared.onLogout {
-            Event.shared.openMain()
-        }
+        // Sign for log in and log out action
+        Event.shared.onLogout(execute: loggedInOrLoggedOut)
+        Event.shared.onLogin(execute: loggedInOrLoggedOut)
+        
+        // Sign for log in action
+        Event.shared.onLogin(execute: loggedInOrLoggedOut)
         
         // Sign for open loginVC
         Event.shared.onOpenLogin { [weak self] in // cast weak to avoid memory leak

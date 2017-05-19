@@ -28,6 +28,16 @@ class MenuVC: UIViewController {
         primaryButtonsLoggedOutWrapper.isHidden =   loggedIn
         bottomButtonsLoggedInWrapper.isHidden =     !loggedIn
         bottomButtonsLoggedOutWrapper.isHidden =    loggedIn
+        
+        // Debug purpose
+        let rec = UILongPressGestureRecognizer(target: self, action: #selector(showQuestionsNo))
+        rec.minimumPressDuration = 3
+        versionLabel.isUserInteractionEnabled = true
+        versionLabel.addGestureRecognizer(rec)
+    }
+    
+    func showQuestionsNo() {
+        versionLabel.text = "DB v\(Settings.shared.appMajorVersion).\(Settings.shared.appMinorVersion)/\(Question.cachedList().count)"
     }
     
     // MARK: - Action Methods

@@ -7,6 +7,8 @@
 import UIKit
 
 class Settings {
+    
+    public static let kIAPProductId = "PTBE1NYSALES2"
 
     public static let shared = Settings()
     private let ud = UserDefaults.standard

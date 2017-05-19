@@ -239,9 +239,7 @@ class MainVC: UIViewController {
     }
     
     func purchase(testButton: TestButton, kind: Test.Kind) {
-        let productId = "PTBE1NYSALES"
-        
-        SwiftyStoreKit.purchaseProduct(productId, atomically: true) { result in
+        SwiftyStoreKit.purchaseProduct(Settings.kIAPProductId, atomically: true) { result in
             switch result {
             case .success:
                 // store purchased state
@@ -267,6 +265,24 @@ class MainVC: UIViewController {
         }
     }
     
+    var product: SKProduct?
+    
+    func loadProduct(callback: @escaping () -> Void) {
+        if let _ = product {
+            callback()
+        } else {
+            SwiftyStoreKit.retrieveProductsInfo([Settings.kIAPProductId], completion: {
+                for product in $0.retrievedProducts {
+                    if product.productIdentifier == Settings.kIAPProductId {
+                        self.product = product
+                    }
+                }
+                
+                callback()
+            })
+        }
+    }
+    
     func openTest(testButton: TestButton, kind: Test.Kind) {
         if Question.cachedList().count == 0 {
             loadQuestions {
@@ -280,16 +296,28 @@ class MainVC: UIViewController {
         if !test.purchased {
             testButton.highlighted = true
             
-            UIAlertController.show(in: self,
-                                   withTitle: "Premium access",
-                                   message: "Get over 1,000+ test questions and the Dabble and Grind tests for $19.99",
-                                   actions: [
-                                    UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
-                                        testButton.highlighted = false
-                                    }),
-                                    UIAlertAction(title: "Buy", style: .default, handler: { _ in
-                                        self.purchase(testButton: testButton, kind: kind)
-                                    })])
+            var alertMessage = "Get over 1,000+ test questions and the Dabble and Grind tests"
+            
+            MBProgressHUD.showAdded(to: view, animated: true)
+            loadProduct {
+                MBProgressHUD.hide(for: self.view, animated: true)
+                
+                if let product = self.product, let price = product.localizedPrice {
+                    alertMessage.append(" for ")
+                    alertMessage.append(price)
+                }
+                
+                UIAlertController.show(in: self,
+                                       withTitle: "Premium access",
+                                       message: alertMessage,
+                                       actions: [
+                                        UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
+                                            testButton.highlighted = false
+                                        }),
+                                        UIAlertAction(title: "Buy", style: .default, handler: { _ in
+                                            self.purchase(testButton: testButton, kind: kind)
+                                        })])
+            }
             
             return
         }

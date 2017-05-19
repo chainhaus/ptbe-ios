@@ -135,12 +135,10 @@ class SettingsVC: UIViewController {
     }
     
     func restorePurchase() {
-        let productId = "PTBE1NYSALES"
-        
         SwiftyStoreKit.restorePurchases(atomically: true) { results in
             var hasPurchase = false
             for product in results.restoredProducts {
-                if product.productId == productId {
+                if product.productId == Settings.kIAPProductId {
                     hasPurchase = true
                     break
                 }

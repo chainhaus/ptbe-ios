@@ -107,11 +107,6 @@ extension Api {
                 
                 Settings.shared.sessionKey = sessionKey
                 Settings.shared.userEmail = email
-                            
-                if !premiumUser && Test.of(kind: Test.premiumKinds.first!).purchased != premiumUser {
-                    // silently try to send purchase to API
-                    self.submitPurchase(callback: nil)
-                }
                 
                 callback(true, nil)
             }
@@ -373,30 +368,6 @@ extension Api {
                 callback(nil,
                          "Couldn't load questions bank. Please check your internet connection and try again later.")
             }
-        }
-    }
-    
-    public func submitPurchase(callback: ((_ submitted: Bool) -> Void)?) {
-        request("purchaseInAppMade",
-                method: .post,
-                body: nil) {
-                        if let response = $0 as? [String : Any] {
-                            guard let statusCode = response[kStatusCode] as? Int,
-                                statusCode == 0 else {
-                                    if let callback = callback {
-                                        callback(false)
-                                    }
-                                    return
-                            }
-                            
-                            if let callback = callback {
-                                callback(true)
-                            }
-                        } else {
-                            if let callback = callback {
-                                callback(false)
-                            }
-                        }
         }
     }
 }

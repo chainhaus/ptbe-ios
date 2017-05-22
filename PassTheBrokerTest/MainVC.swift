@@ -199,33 +199,6 @@ class MainVC: UIViewController {
     
     // MARK: - Action Methods
     
-    func submitPurchase(testButton: TestButton, kind: Test.Kind) {
-        if !Settings.shared.loggedIn {
-            paymentSuccessful(testButton: testButton, kind: kind)
-            return
-        }
-        
-        MBProgressHUD.showAdded(to: view, animated: true)
-        
-        Api.shared.submitPurchase(callback: {
-            MBProgressHUD.hide(for: self.view, animated: true)
-            
-            if $0 {
-                self.paymentSuccessful(testButton: testButton, kind: kind)
-            } else {
-                UIAlertController.show(in: self,
-                                       withTitle: "Warning",
-                                       message: "Payment was successful, but couldn't activate your premium access.\nYou can either retry now or later from settings.",
-                                       actions: [
-                                        UIAlertAction(title: "Later", style: .destructive, handler: nil),
-                                        UIAlertAction(title: "Now", style: .default, handler: { _ in
-                                            self.submitPurchase(testButton: testButton, kind: kind)
-                                        })
-                    ])
-            }
-        })
-    }
-    
     func paymentSuccessful(testButton: TestButton, kind: Test.Kind) {
         UIAlertController.show(okAlertIn: self,
                                withTitle: "Congratulations",
@@ -250,7 +223,7 @@ class MainVC: UIViewController {
                     }
                 }
                 
-                self.submitPurchase(testButton: testButton, kind: kind)
+                self.paymentSuccessful(testButton: testButton, kind: kind)
             case .error(let error):
                 var errorString: String!
                 

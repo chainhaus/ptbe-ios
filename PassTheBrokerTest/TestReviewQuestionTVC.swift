@@ -26,7 +26,12 @@ class TestReviewQuestionTVC: UITableViewCell {
         }
         
         if let correctAnswer = question.value(forKeyPath: "choice\(question.answer)") as? String {
-            correctAnswerLabel.text = "Answer: ".appending(correctAnswer)
+            var answerText = "Answer: ".appending(correctAnswer)
+            if question.solutionDescription != "" {
+                answerText.append("\nSolution Description: ")
+                answerText.append(question.solutionDescription)
+            }
+            correctAnswerLabel.text = answerText
         }
     }
 }

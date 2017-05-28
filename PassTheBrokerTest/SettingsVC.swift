@@ -125,6 +125,7 @@ class SettingsVC: UIViewController {
                                        message: "Nothing to restore")
             }
         }
+        NSHomeDirectory()
     }
     
     // MARK: - Action Methods

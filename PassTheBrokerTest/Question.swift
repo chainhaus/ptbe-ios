@@ -22,6 +22,7 @@ class Question: Object {
     dynamic var choice3 = ""
     dynamic var choice4 = ""
     dynamic var choice5 = ""
+    dynamic var solutionDescription = ""
     
     var topic: Topic! {
         get {
@@ -66,7 +67,8 @@ class Question: Object {
             let choice2 = jsonObject["choice2"] as? String,
             let choice3 = jsonObject["choice3"] as? String,
             let choice4 = jsonObject["choice4"] as? String,
-            let choice5 = jsonObject["choice5"] as? String
+            let choice5 = jsonObject["choice5"] as? String,
+            let solutionDescription = jsonObject["solutionDescription"] as? String
         
             else {
                 return nil
@@ -83,6 +85,7 @@ class Question: Object {
         question.choice3 = choice3
         question.choice4 = choice4
         question.choice5 = choice5
+        question.solutionDescription = solutionDescription
         
         return question
     }

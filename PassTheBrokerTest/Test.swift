@@ -142,7 +142,7 @@ class Test: Object {
             }
         }
         
-        for _ in 1...self.questionsCount {
+        for i in 1...self.questionsCount {
             let question = questionsForAvailableTopics[Int(arc4random_uniform(UInt32(questionsForAvailableTopics.count)))]
             questionsForAvailableTopics.remove(at: questionsForAvailableTopics.index(of: question)!)
             questions.append(question)

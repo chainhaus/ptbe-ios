@@ -37,8 +37,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         autoreleasepool {
             let configuration = Realm.Configuration(
                 encryptionKey: getKey() as Data,
-                migrationBlock: { _ in
-            })
+                
+                schemaVersion: RealmMigrations.schemaVersion,
+                migrationBlock: RealmMigrations.migrationHandler)
+            
             
             do {
                 _ = try Realm(configuration: configuration)

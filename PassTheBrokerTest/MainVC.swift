@@ -269,7 +269,7 @@ class MainVC: UIViewController {
         if !test.purchased {
             testButton.highlighted = true
             
-            var alertMessage = "Get over 1,000+ test questions and the Dabble and Grind tests"
+            var alertMessage = "Get over 1,200+ of the MOST relevant exam prep questions."
             
             MBProgressHUD.showAdded(to: view, animated: true)
             loadProduct {
